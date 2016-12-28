@@ -23,6 +23,7 @@ import okhttp3.WebSocketListener;
 
 
 
+@SuppressWarnings("WeakerAccess")
 public class API {
 
     private static final String TAG = "API";
@@ -90,7 +91,7 @@ public class API {
 
     public OrderBookSnapshot getOrderBookSnapshot() {
         final Request req = new Request.Builder().url(GDAX_ORDER_BOOK_SNAPSHOT_URL).build();
-        Response response = null;
+        Response response;
         try {
             response = client.newCall(req).execute();
             JsonParser parser = new JsonParser();
@@ -107,9 +108,10 @@ public class API {
         return null;
     }
 
-    public void qdisconnect() {
+    public void disconnect() {
         if (isConnected()) {
             feedSocket.close(1000, null);
+            feedSocket = null;
         }
     }
 
