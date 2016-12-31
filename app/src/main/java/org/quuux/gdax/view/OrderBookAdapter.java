@@ -29,7 +29,7 @@ public class OrderBookAdapter extends BaseAdapter {
     private static OrderBookEntry MARKER = new OrderBookEntry();
 
     private static class Holder {
-        TextView side, price, size;
+        TextView side, price, size, num_orders, spread;
     }
 
     private final Context context;
@@ -94,12 +94,18 @@ public class OrderBookAdapter extends BaseAdapter {
     }
 
     private void bindMarkerView(final View view) {
-
+        final Holder holder = (Holder) view.getTag();
+        holder.spread.setText(Util.currencyFormat(orderBook.getSpread()) + " spread");
     }
 
     private View newMarkerView(final ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View v = inflater.inflate(R.layout.order_book_marker, parent, false);
+
+        Holder holder = new Holder();
+        holder.spread = (TextView)v.findViewById(R.id.spread);
+        v.setTag(holder);
+
         return v;
     }
 
@@ -111,7 +117,7 @@ public class OrderBookAdapter extends BaseAdapter {
         holder.side = (TextView) v.findViewById(R.id.side);
         holder.price = (TextView) v.findViewById(R.id.price);
         holder.size = (TextView) v.findViewById(R.id.size);
-
+        holder.num_orders = (TextView) v.findViewById(R.id.num_orders);
         v.setTag(holder);
 
         return v;
@@ -121,7 +127,8 @@ public class OrderBookAdapter extends BaseAdapter {
         final Holder holder = (Holder) view.getTag();
         holder.side.setText(item.side.name());
         holder.price.setText(Util.currencyFormat(item.bin.price));
-        holder.size.setText(Util.decimalFormat(item.bin.size));
+        holder.size.setText(Util.decimalFormat(item.bin.size) + " btc");
+        holder.num_orders.setText(String.format("%d orders", item.bin.num_orders));
     }
 
     public int getMarkerPosition() {

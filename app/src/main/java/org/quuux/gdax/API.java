@@ -82,7 +82,7 @@ public class API {
             BigDecimal price = row.get(0).getAsBigDecimal();
             BigDecimal size = row.get(1).getAsBigDecimal();
             String order_id = row.get(2).getAsString();
-            Order order = new Order(order_id, size, price);
+            Order order = new Order(order_id, price, size);
             rv.add(order);
         }
 
@@ -91,21 +91,21 @@ public class API {
 
     public OrderBookSnapshot getOrderBookSnapshot() {
         final Request req = new Request.Builder().url(GDAX_ORDER_BOOK_SNAPSHOT_URL).build();
-        Response response;
+        OrderBookSnapshot rv = null;
         try {
-            response = client.newCall(req).execute();
+            Log.d(TAG, "fetching %s...", GDAX_ORDER_BOOK_SNAPSHOT_URL);
+            Response response = client.newCall(req).execute();
             JsonParser parser = new JsonParser();
             JsonObject obj = parser.parse(response.body().charStream()).getAsJsonObject();
 
-            OrderBookSnapshot snapshot = new OrderBookSnapshot();
-            snapshot.sequence = obj.get("sequence").getAsLong();
-            snapshot.asks = buildBins(obj, "asks");
-            snapshot.bids = buildBins(obj, "bids");
-
+            rv = new OrderBookSnapshot();
+            rv.sequence = obj.get("sequence").getAsLong();
+            rv.asks = buildBins(obj, "asks");
+            rv.bids = buildBins(obj, "bids");
         } catch (IOException e) {
             Log.e(TAG, "error populating order book: %s", e);
         }
-        return null;
+        return rv;
     }
 
     public void disconnect() {

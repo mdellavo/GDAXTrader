@@ -6,11 +6,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.quuux.gdax.MainActivity">
+    tools:context="org.quuux.gdax.MainActivity"
+    android:orientation="vertical">
+
+    <org.quuux.gdax.view.DepthView
+        android:id="@+id/depth"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <ListView
         android:id="@+id/orders"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>

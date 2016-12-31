@@ -4,22 +4,23 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ListView;
 
+import org.quuux.gdax.model.FeedMessage;
+import org.quuux.gdax.model.OrderBook;
+import org.quuux.gdax.view.DepthView;
 import org.quuux.gdax.view.OrderBookAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final long TICK = 1000;
     private OrderBookService service;
     private boolean bound;
 
-    private Handler handler = new Handler();
     private ListView orders;
+    private DepthView depth;
     private OrderBookAdapter adapter;
 
     @Override
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         orders = (ListView) findViewById(R.id.orders);
+        depth = (DepthView)findViewById(R.id.depth);
     }
 
     @Override
@@ -45,16 +47,23 @@ public class MainActivity extends AppCompatActivity {
             this.service = null;
             unbindService(connection);
         }
-
-        handler.removeCallbacks(updater);
     }
 
     private void connect(OrderBookService service) {
         this.service = service;
-        this.service.connectToFeed();
-        adapter = new OrderBookAdapter(MainActivity.this, MainActivity.this.service.getOrderBook());
-        handler.postDelayed(updater, TICK);
+        this.service.connectToFeed(listener);
+        OrderBook orderBook = MainActivity.this.service.getOrderBook();
+        adapter = new OrderBookAdapter(MainActivity.this, orderBook);
+        depth.setOrderBook(orderBook);
+    }
 
+    private void updateOrderBook() {
+        adapter.update();
+        if (orders.getAdapter() == null && adapter.getCount() > 0) {
+            orders.setAdapter(adapter);
+        }
+        orders.setSelection(adapter.getMarkerPosition() - 5);
+        depth.update();
     }
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -71,17 +80,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    Runnable updater = new Runnable() {
+    final API.FeedListener listener = new API.FeedListener() {
         @Override
-        public void run() {
-            if (adapter != null) {
-                adapter.update();
-                orders.smoothScrollToPosition(adapter.getMarkerPosition());
-                if (orders.getAdapter() == null && adapter.getCount() > 0) {
-                    orders.setAdapter(adapter);
-                }
-            }
-            handler.postDelayed(this, TICK);
+        public void onMessage(final FeedMessage message) {
+            updateOrderBook();
+        }
+
+        @Override
+        public void onSnapshot(final API.OrderBookSnapshot snapshot) {
+            updateOrderBook();
         }
     };
 }
