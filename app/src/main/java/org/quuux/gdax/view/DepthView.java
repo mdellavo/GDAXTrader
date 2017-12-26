@@ -19,17 +19,19 @@ import java.math.BigDecimal;
 public class DepthView extends View {
 
     private static final String TAG = Log.buildTag(DepthView.class);
-    private static final int POINTS = 10000;
+    private static final int RANGE = 50;
+    private static final float LINE_WIDTH = 3;
+    private static final int BINS = 100;
 
-    private OrderBook orderBook;
-    private float[] buyPoints = new float[POINTS * 4];
-    private float[] sellPoints = new float[POINTS * 4];
     private int width;
     private int height;
+
+    private OrderBook orderBook;
+
+    private float[] buyPoints = new float[BINS * 2 * 4];
+    private float[] sellPoints = new float[BINS * 2 * 4];
     private Paint buyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint sellPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private int numBuyPoints;
-    private int numSellPoints;
 
     public DepthView(final Context context) {
         super(context);
@@ -55,8 +57,8 @@ public class DepthView extends View {
     @Override
     protected void onDraw(final Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawLines(buyPoints, 0, numBuyPoints, buyPaint);
-        canvas.drawLines(sellPoints, 0, numSellPoints, sellPaint);
+        canvas.drawLines(buyPoints, 0, BINS * 2, buyPaint);
+        canvas.drawLines(sellPoints, 0, BINS * 2, sellPaint);
     }
 
     @Override
@@ -68,41 +70,64 @@ public class DepthView extends View {
 
     private void init() {
         buyPaint.setColor(Color.RED);
-        buyPaint.setStrokeWidth(10);
+        buyPaint.setStrokeWidth(LINE_WIDTH);
 
         sellPaint.setColor(Color.BLUE);
-        sellPaint.setStrokeWidth(10);
+        sellPaint.setStrokeWidth(LINE_WIDTH);
     }
 
     public void setOrderBook(OrderBook orderBook) {
         this.orderBook = orderBook;
-        invalidate();
     }
 
-    private int renderSide(final OrderBook.Side side, float[] points) {
-        double maxPrice = orderBook.getMaxPrice(side).doubleValue();
-        double maxSize = orderBook.getMaxSize(side).doubleValue();
-        int numPrices = orderBook.numPrices(side);
+    private void renderSide(final OrderBook.Side side, float[] points) {
+        double midpointPrice = orderBook.getMidpointPrice().doubleValue();
+        double minPrice = midpointPrice - RANGE;
+        double maxPrice = midpointPrice + RANGE;
+        double range = maxPrice - minPrice;
+        double maxSize = orderBook.getMaxSizeInRange(side, new BigDecimal(minPrice), new BigDecimal(maxPrice)).doubleValue();
 
-        int i = 0;
-        for (BigDecimal price : orderBook.prices(side)) {
-            OrderBook.OrderBookBin bin = orderBook.getBin(side, price);
-            double x = price.doubleValue() / maxPrice * width;
-            double y = height - (bin.size.doubleValue() / maxSize * height);
-            points[i] = (float) x;
-            points[i+1] = (float) y;
-            //Log.d(TAG, "price=%s / size=%s -> %s,%s", price.doubleValue(), bin.size.doubleValue(), x, y);
-            i += 2;
+        int offset = 0;
+        for (int i=0; i<BINS; i++) {
+            double a = (double)i / (double)BINS;
+            double b = (double)(i + 1) / (double)BINS;
+
+            double priceLower = (a * range) + minPrice;
+            double priceUpper = (b * range) + minPrice;
+
+            OrderBook.OrderBookBin bin = orderBook.sumRange(side, new BigDecimal(priceLower), new BigDecimal(priceUpper));
+            if (bin != null) {
+                double size = bin.size.doubleValue();
+                double x1 = width * a;
+                double x2 = width * b;
+                double y = height - (size / maxSize * height);
+
+                if (offset > 0) {
+                    points[offset] = points[offset - 2];
+                    points[offset + 1] = points[offset - 1];
+                    points[offset + 2] = (float) x1;
+                    points[offset + 3] = (float) y;
+                    offset += 4;
+                }
+
+                points[offset] = (float) x1;
+                points[offset + 1] = (float) y;
+                points[offset + 2] = (float) x2;
+                points[offset + 3] = (float) y;
+
+                offset += 4;
+
+            }
         }
-
-        return numPrices;
     }
 
     public void update() {
-        if (orderBook != null) {
-            numBuyPoints = renderSide(OrderBook.Side.buy, buyPoints);
-            numSellPoints = renderSide(OrderBook.Side.sell, sellPoints);
-        }
+        if (orderBook == null)
+            return;
+
+        renderSide(OrderBook.Side.buy, buyPoints);
+        renderSide(OrderBook.Side.sell, sellPoints);
+
         invalidate();
     }
 }

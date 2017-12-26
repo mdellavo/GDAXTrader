@@ -13,6 +13,8 @@ import org.quuux.gdax.model.OrderBook;
 
 import java.math.BigDecimal;
 
+import okhttp3.Response;
+
 
 public class OrderBookService extends Service {
 
@@ -64,6 +66,16 @@ public class OrderBookService extends Service {
                         listener.onSnapshot(snapshot);
                     }
                 });
+            }
+
+            @Override
+            public void onError(final Throwable t, final Response response) {
+                listener.onError(t, response);
+            }
+
+            @Override
+            public void onClosed(final int code, final String reason) {
+                listener.onClosed(code, reason);
             }
         });
     }

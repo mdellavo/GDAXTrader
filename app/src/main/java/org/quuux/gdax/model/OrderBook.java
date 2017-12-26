@@ -3,6 +3,7 @@ package org.quuux.gdax.model;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -14,6 +15,7 @@ public class OrderBook {
         public BigDecimal price;
         public BigDecimal size = new BigDecimal(0);
         public long num_orders;
+
         public OrderBookBin(BigDecimal price) {
             this.price = price;
         }
@@ -60,9 +62,8 @@ public class OrderBook {
     public void incDepth(Side side, BigDecimal price, BigDecimal size) {
         OrderBookBin bin = getBin(side, price);
         if (bin == null) {
-            price = roundPrice(price);
             bin = new OrderBookBin(price);
-            getHist(side).put(price, bin);
+            getHist(side).put(roundPrice(price), bin);
         }
 
         bin.size = bin.size.add(size);
@@ -90,23 +91,51 @@ public class OrderBook {
 
     public BigDecimal getMinPrice(Side side) {
         TreeMap<BigDecimal, OrderBookBin> hist = getHist(side);
-        return hist.size() > 0? hist.firstKey() : null;
+        return hist.size() > 0 ? hist.firstKey() : null;
+    }
+
+    public BigDecimal getMinAsk() {
+        return getMinPrice(Side.sell);
     }
 
     public BigDecimal getMaxPrice(Side side) {
         TreeMap<BigDecimal, OrderBookBin> hist = getHist(side);
-        return hist.size() > 0? hist.lastKey() : null;
+        return hist.size() > 0 ? hist.lastKey() : null;
     }
 
-    public BigDecimal getMaxSize(Side side) {
+    public BigDecimal getMaxBid() {
+        return getMaxPrice(Side.buy);
+    }
+
+    public BigDecimal getMaxSizeInRange(Side side, BigDecimal lower, BigDecimal upper) {
         BigDecimal rv = BigDecimal.valueOf(-1);
-        for (OrderBookBin bin : getHist(side).values()) {
+        for (OrderBookBin bin : getHist(side).subMap(roundPrice(lower), true, roundPrice(upper), true).values()) {
             rv = rv.max(bin.size);
         }
         return rv;
     }
 
     public BigDecimal getSpread() {
-        return getHist(Side.sell).firstKey().subtract(getHist(Side.buy).lastKey());
+        return getMinAsk().subtract(getMaxBid());
+    }
+
+    public BigDecimal getMidpointPrice() {
+        BigDecimal maxBid = getMaxBid();
+        BigDecimal spread = getSpread();
+        return maxBid.add(spread.divide(BigDecimal.valueOf(2), BigDecimal.ROUND_HALF_UP));
+    }
+
+    public OrderBookBin sumRange(Side side, BigDecimal a, BigDecimal b) {
+        BigDecimal mid = a.add(b).divide(BigDecimal.valueOf(2), BigDecimal.ROUND_HALF_UP);
+        OrderBookBin rv = new OrderBookBin(mid);
+
+        NavigableMap<BigDecimal, OrderBookBin> submap = getHist(side).subMap(roundPrice(a), true, roundPrice(b), true);
+        for (BigDecimal key : submap.keySet()) {
+            OrderBookBin bin = submap.get(key);
+            rv.size = rv.size.add(bin.size);
+            rv.num_orders += bin.num_orders;
+        }
+
+        return rv;
     }
 }

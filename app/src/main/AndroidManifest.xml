@@ -20,6 +20,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SignInActivity"/>
+
         <service
             android:name=".OrderBookService"
             android:enabled="true"
