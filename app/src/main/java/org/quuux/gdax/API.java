@@ -7,6 +7,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.quuux.feller.Log;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
@@ -21,6 +23,7 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -38,7 +41,7 @@ public class API {
     private static final String CLIENT_ID = "595cdd1b0acc22a78debbf6f9a2a928e2e25482f74132dbd410f549046a98ba9";
     private static final String CLIENT_SECRET = "cac3c43f727379cd7aeee0958d1c007561b6c52ff55ddd62d2b461db1cb57b74";
 
-    private static final String COINBASE_OATH_URL = "https://www.coinbase.com/oauth/authorize";
+    private static final String COINBASE_OATH_URL = "https://www.coinbase.com/oauth/authorize/create_session";
     private static final String REDIRECT_URI = "gdax-quuux://coinbase-oauth";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
@@ -50,6 +53,11 @@ public class API {
     private static final String GDAX_FEED_URL = "wss://ws-feed.gdax.com";
     private static final String GDAX_API_URL = "https://api.gdax.com";
     private static final String GDAX_ORDER_BOOK_SNAPSHOT_URL = GDAX_API_URL + "/products/BTC-USD/book?level=3";
+
+    private static final String GDAX_ACCOUNT_URL = GDAX_API_URL + "/accounts";
+    private static final String GDAX_SESSION_URL = GDAX_API_URL + "/sessions";
+
+    public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
     static class OrderBookSnapshot {
         long sequence;
@@ -166,6 +174,53 @@ public class API {
 
             @Override
             public void onResponse(final Call call, final Response response) throws IOException {
+            }
+        });
+    }
+
+    public void createSession(String code) {
+        final JSONObject payload = new JSONObject();
+        try {
+            payload.put("code", code);
+            payload.put("redirect_uri", REDIRECT_URI);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        final RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, payload.toString());
+
+        final Request req = new Request.Builder()
+                .url(GDAX_SESSION_URL)
+                .post(body)
+                .build();
+        client.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(final Call call, final IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(final Call call, final Response response) throws IOException {
+                Log.d(TAG, "response: %s -> %s", response, response.body().string());
+            }
+        });
+    }
+
+    public void getAccounts(String token) {
+        final Request req = new Request.Builder()
+                .url(GDAX_ACCOUNT_URL)
+                .addHeader("cb-session", token)
+                .get()
+                .build();
+        client.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(final Call call, final IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(final Call call, final Response response) throws IOException {
+                Log.d(TAG, "response: %s", response);
             }
         });
     }

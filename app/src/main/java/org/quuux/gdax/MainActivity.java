@@ -1,6 +1,7 @@
 package org.quuux.gdax;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,25 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (NavigationView) findViewById(R.id.navigation);
         mDrawerLayout.openDrawer(mDrawerList, false);
+
+        mDrawerList.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
+                return onNavSelected(item);
+            }
+        });
+    }
+
+    private boolean onNavSelected(final MenuItem item) {
+        boolean rv = false;
+        switch (item.getItemId()) {
+            case R.id.setup:
+                launchSetup();
+                rv = true;
+                break;
+
+        }
+        return rv;
     }
 
     @Override
@@ -49,11 +69,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         boolean rv;
         switch (item.getItemId()) {
-            case R.id.signin:
-                launchSignIn();
-                rv = true;
-                break;
-
             default:
                 rv = super.onOptionsItemSelected(item);
                 break;
@@ -64,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void launchSignIn() {
         startActivity(new Intent(this, SignInActivity.class));
+    }
+
+    private void launchSetup() {
+        startActivity(new Intent(this, SetupActivity.class));
     }
 
 //    private void connect(OrderBookService service) {

@@ -52,11 +52,16 @@ public class SignInActivity  extends AppCompatActivity {
         Log.d(TAG, "url: %s", url);
         if (url.getScheme().equals(SCHEME)) {
             String code = url.getQueryParameter("code");
-            getToken(code);
+            //getToken(code);
+            createSession(code);
             return true;
         }
 
         return false;
+    }
+
+    private void createSession(String code) {
+        API.getInstance().createSession(code);
     }
 
     private void getToken(String code) {

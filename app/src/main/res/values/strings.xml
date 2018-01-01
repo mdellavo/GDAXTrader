@@ -3,4 +3,10 @@
     <string name="spread">Spread</string>
     <string name="signin">Sign in</string>
     <string name="orderbook">Order Book</string>
+    <string name="api_key">API Key</string>
+    <string name="api_secret">API Secret</string>
+    <string name="save">Save</string>
+    <string name="api_passphrase">Passphrase</string>
+    <string name="not_empty">This field cannot be empty</string>
+    <string name="setup">Setup</string>
 </resources>

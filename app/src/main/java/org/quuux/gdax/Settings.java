@@ -31,11 +31,26 @@ public class Settings {
     }
 
     public String getAccessToken() {
-        return prefs.getString("access_token", null);
+        String token = prefs.getString("access_token", null);
+        return token != null ? GDAXKeyStore.getInstance().decrypt(token) : null;
     }
 
     public String getRefreshToken() {
-        return prefs.getString("refresh_token", null);
+        String token = prefs.getString("refresh_token", null);
+        return token != null ? GDAXKeyStore.getInstance().decrypt(token) : null;
+    }
+
+    public Date getExpired() {
+        Date rv = null;
+        String expired = prefs.getString("expired", null);
+        if (expired != null) {
+            try {
+                rv = df.parse(expired);
+            } catch (ParseException e) {
+                Log.e(TAG, "error parsing expired (%s): %s", expired, e);
+            }
+        }
+        return rv;
     }
 
     public boolean hasAccessToken() {
@@ -43,16 +58,8 @@ public class Settings {
     }
 
     public boolean areTokensValid() {
-        String expired = prefs.getString("expired", null);
-        if (expired != null) {
-            try {
-                return df.parse(expired).after(new Date());
-            } catch (ParseException e) {
-                Log.e(TAG, "error parsing expired (%s): %s", expired, e);
-            }
-        }
-
-        return false;
+        Date expired = getExpired();
+        return expired != null && expired.after(new Date());
     }
 
     public boolean hasValidTokens() {
@@ -60,18 +67,54 @@ public class Settings {
     }
 
     public void setTokens(String access_token, final String refresh_token, Date expires) {
+        GDAXKeyStore keystore = GDAXKeyStore.getInstance();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("access_token", access_token);
-        editor.putString("refresh_token", refresh_token);
+        editor.putString("access_token", keystore.encrypt(access_token));
+        editor.putString("refresh_token", keystore.encrypt(refresh_token));
         editor.putString("expires", df.format(expires));
         editor.apply();
     }
 
     public void clearTokens() {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("access_token", null);
-        editor.putString("refresh_token", null);
-        editor.putString("expires", null);
+        editor.remove("access_token");
+        editor.remove("refresh_token");
+        editor.remove("expires");
         editor.apply();
     }
+
+    public String getApiKey() {
+        String token = prefs.getString("api_key", null);
+        return token != null ? GDAXKeyStore.getInstance().decrypt(token) : null;
+    }
+
+    public String getApiSecret() {
+        String token = prefs.getString("api_secret", null);
+        return token != null ? GDAXKeyStore.getInstance().decrypt(token) : null;
+    }
+
+    public String getApiPassphrase() {
+        String token = prefs.getString("api_passphrase", null);
+        return token != null ? GDAXKeyStore.getInstance().decrypt(token) : null;
+    }
+
+    public void setApiKey(String key, final String secret, String passphrase) {
+
+        GDAXKeyStore keystore = GDAXKeyStore.getInstance();
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("api_key", keystore.encrypt(key));
+        editor.putString("api_secret", keystore.encrypt(secret));
+        editor.putString("api_passphrase", keystore.encrypt(passphrase));
+        editor.apply();
+    }
+
+    public void clearApiKey() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove("api_key");
+        editor.remove("api_secret");
+        editor.remove("api_passphrase");
+        editor.apply();
+    }
+
 }
