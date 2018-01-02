@@ -47,7 +47,6 @@ public class GDAXKeyStore {
     }
 
     public SecretKey getSecretKey() {
-        dumpKeys();
         SecretKey rv = null;
         try {
             rv = ((KeyStore.SecretKeyEntry) keystore.getEntry(SECRET_KEY_ALIAS, null)).getSecretKey();
@@ -158,7 +157,7 @@ public class GDAXKeyStore {
                 Log.d(TAG, "alias: %s", aliases.nextElement());
             }
         } catch (KeyStoreException e) {
-            e.printStackTrace();
+            Log.e(TAG, "error dumping keys", e);
         }
     }
 

@@ -43,7 +43,12 @@ public class SetupActivity extends AppCompatActivity {
 
         if (apiKey != null && apiSecret != null && apiPassphrase != null) {
             saveKey(apiKey, apiSecret, apiPassphrase);
-            finish();
+            API api = API.getInstance();
+
+            api.setApiKey(apiKey, apiSecret, apiPassphrase);
+            api.getAccounts();
+
+            //finish();
         }
     }
 

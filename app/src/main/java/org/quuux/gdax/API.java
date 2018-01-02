@@ -1,8 +1,11 @@
 package org.quuux.gdax;
 
+import android.content.Context;
 import android.net.Uri;
+import android.util.Base64;
 
 import com.google.gson.Gson;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,9 +19,14 @@ import org.quuux.gdax.model.SubscribeMessage;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -54,8 +62,9 @@ public class API {
     private static final String GDAX_API_URL = "https://api.gdax.com";
     private static final String GDAX_ORDER_BOOK_SNAPSHOT_URL = GDAX_API_URL + "/products/BTC-USD/book?level=3";
 
-    private static final String GDAX_ACCOUNT_URL = GDAX_API_URL + "/accounts";
     private static final String GDAX_SESSION_URL = GDAX_API_URL + "/sessions";
+
+    private static final String GDAX_ACCOUNT_ENDPOINT = "/accounts";
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
@@ -91,6 +100,10 @@ public class API {
 
     private static API instance;
 
+    private String apiKey;
+    private String apiSecretKey;
+    private String apiPassphrase;
+
     private WebSocket feedSocket;
     private Gson gson = new Gson();
     private OkHttpClient client;
@@ -111,8 +124,34 @@ public class API {
         return instance;
     }
 
+    public void setApiKey(String apiKey, String secretKey, String passphase) {
+        this.apiKey = apiKey;
+        this.apiSecretKey = secretKey;
+        this.apiPassphrase = passphase;
+    }
+
+    public boolean hasAuth() {
+        return this.apiKey != null && this.apiSecretKey != null && this.apiPassphrase != null;
+    }
+
     public boolean isConnected() {
         return feedSocket != null;
+    }
+
+    public String sign(String secret, String requestPath, String method, String body, String timestamp) {
+        String rv = null;
+        try {
+            String prehash = timestamp + method.toUpperCase() + requestPath + (body != null ? body : "");
+            byte[] hmacKey = Base64.decode(secret, 0);
+            SecretKeySpec keyspec = new SecretKeySpec(hmacKey, "HmacSHA256");
+            Mac sha256 =  Mac.getInstance("HmacSHA256");
+            sha256.init(keyspec);
+            byte[] hashed = sha256.doFinal(prehash.getBytes());
+            rv = Base64.encodeToString(hashed, Base64.NO_WRAP);
+        } catch (InvalidKeyException | NoSuchAlgorithmException | IllegalArgumentException e) {
+            Log.d(TAG, "error signing request: %s", e);
+        }
+        return rv;
     }
 
     public String getOAuthUrl() {
@@ -206,12 +245,21 @@ public class API {
         });
     }
 
-    public void getAccounts(String token) {
-        final Request req = new Request.Builder()
-                .url(GDAX_ACCOUNT_URL)
-                .addHeader("cb-session", token)
-                .get()
+    public Request authedRequest(String method, String path, String body) {
+        String timestamp = String.valueOf(new Date().getTime() / 1000);
+
+        return new Request.Builder()
+                .url(GDAX_API_URL +  path)
+                .method(method, body != null ? RequestBody.create(JSON_MEDIA_TYPE, body) : null)
+                .addHeader("CB-ACCESS-KEY", apiKey)
+                .addHeader("CB-ACCESS-SIGN", sign(apiSecretKey, path, method, body, timestamp))
+                .addHeader("CB-ACCESS-TIMESTAMP", timestamp)
+                .addHeader("CB-ACCESS-PASSPHRASE", apiPassphrase)
                 .build();
+    }
+
+    public void getAccounts() {
+        final Request req = authedRequest("GET", GDAX_ACCOUNT_ENDPOINT, null);
         client.newCall(req).enqueue(new Callback() {
             @Override
             public void onFailure(final Call call, final IOException e) {
@@ -220,7 +268,7 @@ public class API {
 
             @Override
             public void onResponse(final Call call, final Response response) throws IOException {
-                Log.d(TAG, "response: %s", response);
+                Log.d(TAG, "response: %s -> %s", response, response.body().string());
             }
         });
     }

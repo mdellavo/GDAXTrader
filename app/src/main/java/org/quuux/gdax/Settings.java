@@ -98,6 +98,10 @@ public class Settings {
         return token != null ? GDAXKeyStore.getInstance().decrypt(token) : null;
     }
 
+    public boolean hasApiKey() {
+        return this.prefs.contains("api_key") && this.prefs.contains("api_secret") && this.prefs.contains("api_passphrase");
+    }
+
     public void setApiKey(String key, final String secret, String passphrase) {
 
         GDAXKeyStore keystore = GDAXKeyStore.getInstance();
