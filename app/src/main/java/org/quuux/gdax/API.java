@@ -1,18 +1,19 @@
 package org.quuux.gdax;
 
-import android.content.Context;
 import android.net.Uri;
 import android.util.Base64;
 
 import com.google.gson.Gson;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.greenrobot.eventbus.EventBus;
 import org.quuux.feller.Log;
+import org.quuux.gdax.events.APIError;
+import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.SubscribeMessage;
@@ -24,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -31,40 +33,42 @@ import javax.crypto.spec.SecretKeySpec;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
-
+import okio.Buffer;
 
 
 @SuppressWarnings("WeakerAccess")
 public class API {
 
-    private static final String TAG = "API";
+    private static final String TAG = Log.buildTag(API.class);
+
+    private static final String USER_AGENT = "GDAX for Android / 1.0";
 
     private static final String CLIENT_ID = "595cdd1b0acc22a78debbf6f9a2a928e2e25482f74132dbd410f549046a98ba9";
     private static final String CLIENT_SECRET = "cac3c43f727379cd7aeee0958d1c007561b6c52ff55ddd62d2b461db1cb57b74";
 
-    private static final String COINBASE_OATH_URL = "https://www.coinbase.com/oauth/authorize/create_session";
-    private static final String REDIRECT_URI = "gdax-quuux://coinbase-oauth";
+    private static final String GDAX_API_URL = "https://api.gdax.com";
+    private static final String GDAX_ACCOUNTS_URL = GDAX_API_URL + "/accounts";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
     private static final String COINBASE_TOKEN_REVOKE_URL = COINBASE_API_URL + "/oauth/revoke";
+    private static final String COINBASE_OATH_URL = "https://www.coinbase.com/oauth/authorize/create_session";
+
+    private static final String REDIRECT_URI = "gdax-quuux://coinbase-oauth";
 
     private static final String PRODUCT_ID = "BTC-USD";
 
     private static final String GDAX_FEED_URL = "wss://ws-feed.gdax.com";
-    private static final String GDAX_API_URL = "https://api.gdax.com";
     private static final String GDAX_ORDER_BOOK_SNAPSHOT_URL = GDAX_API_URL + "/products/BTC-USD/book?level=3";
-
-    private static final String GDAX_SESSION_URL = GDAX_API_URL + "/sessions";
-
-    private static final String GDAX_ACCOUNT_ENDPOINT = "/accounts";
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
@@ -98,6 +102,11 @@ public class API {
         void onToken(TokenResponse token);
     }
 
+    interface ResponseListener<T> {
+        void onSuccess(T result);
+        void onError(APIError error);
+    }
+
     private static API instance;
 
     private String apiKey;
@@ -105,15 +114,12 @@ public class API {
     private String apiPassphrase;
 
     private WebSocket feedSocket;
-    private Gson gson = new Gson();
+    private Gson gson;
     private OkHttpClient client;
 
     private API() {
         client = getClient();
-    }
-
-    private OkHttpClient getClient() {
-        return new OkHttpClient.Builder().build();
+        gson = getGson();
     }
 
     public static API getInstance() {
@@ -124,6 +130,55 @@ public class API {
         return instance;
     }
 
+    private Interceptor interceptor = new Interceptor() {
+        @Override
+        public Response intercept(final Chain chain) throws IOException {
+            String timestamp = String.valueOf(new Date().getTime() / 1000);
+            Request originalRequest = chain.request();
+
+            Request.Builder builder = originalRequest.newBuilder()
+                    .addHeader("User-Agent", USER_AGENT);
+
+            if (hasAuth()) {
+                RequestBody body = originalRequest.body();
+                Buffer buffer = new Buffer();
+                String bodyString = "";
+                if (body != null) {
+                    body.writeTo(buffer);
+                    bodyString = buffer.readUtf8();
+                }
+                builder
+                        .addHeader("CB-ACCESS-KEY", apiKey)
+                        .addHeader("CB-ACCESS-SIGN", sign(apiSecretKey, originalRequest.url().encodedPath(), originalRequest.method(), bodyString, timestamp))
+                        .addHeader("CB-ACCESS-TIMESTAMP", timestamp)
+                        .addHeader("CB-ACCESS-PASSPHRASE", apiPassphrase);
+            }
+
+            Request request = builder.build();
+
+            long t1 = System.nanoTime();
+            Response response = chain.proceed(request);
+            long t2 = System.nanoTime();
+
+            Log.d(TAG, "%s -> %s (%.1fms)", response.request().url(), response.code(), (t2 - t1) / 1e6d);
+
+            return response;
+        }
+    };
+
+    private OkHttpClient getClient() {
+        return new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+    }
+
+    private Gson getGson() {
+        return new GsonBuilder().create();
+    }
+
     public void setApiKey(String apiKey, String secretKey, String passphase) {
         this.apiKey = apiKey;
         this.apiSecretKey = secretKey;
@@ -132,10 +187,6 @@ public class API {
 
     public boolean hasAuth() {
         return this.apiKey != null && this.apiSecretKey != null && this.apiPassphrase != null;
-    }
-
-    public boolean isConnected() {
-        return feedSocket != null;
     }
 
     public String sign(String secret, String requestPath, String method, String body, String timestamp) {
@@ -153,6 +204,62 @@ public class API {
         }
         return rv;
     }
+
+   class APICallback<T> implements Callback {
+       private final ResponseListener<T> listener;
+       private final Class<T> cls;
+
+       public APICallback(final ResponseListener listener, Class<T> cls) {
+           this.listener = listener;
+           this.cls = cls;
+       }
+
+       @Override
+        public void onFailure(final Call call, final IOException e) {
+           APIError error = new APIError(0, e.getMessage());
+           listener.onError(error);
+           EventBus.getDefault().post(error);
+       }
+
+        @Override
+        public void onResponse(final Call call, final Response response) throws IOException {
+            int code = response.code();
+            ResponseBody body = response.body();
+
+            switch (code) {
+                case 200:
+                    T result = null;
+                    if (body != null) {
+                        String bodys = body.string();
+                        Log.d(TAG, "body: %s", bodys);
+                        result = gson.fromJson(bodys, cls);
+                    }
+                    listener.onSuccess(result);
+                    break;
+
+                default:
+                    String message;
+                    if (body != null)
+                        message = body.string();
+                    else
+                        message = response.message();
+                    APIError error = new APIError(code, message);
+                    listener.onError(error);
+                    EventBus.getDefault().post(error);
+                    break;
+            }
+        }
+    }
+
+    public void getAccounts(ResponseListener<Account[]> listener) {
+        final Request req = new Request.Builder()
+                .get()
+                .url(GDAX_ACCOUNTS_URL)
+                .build();
+        client.newCall(req).enqueue(new APICallback<>(listener, Account[].class));
+    }
+
+    // Oauth
 
     public String getOAuthUrl() {
         return Uri.parse(COINBASE_OATH_URL).buildUpon()
@@ -217,96 +324,10 @@ public class API {
         });
     }
 
-    public void createSession(String code) {
-        final JSONObject payload = new JSONObject();
-        try {
-            payload.put("code", code);
-            payload.put("redirect_uri", REDIRECT_URI);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    // Real time feed
 
-        final RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, payload.toString());
-
-        final Request req = new Request.Builder()
-                .url(GDAX_SESSION_URL)
-                .post(body)
-                .build();
-        client.newCall(req).enqueue(new Callback() {
-            @Override
-            public void onFailure(final Call call, final IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(final Call call, final Response response) throws IOException {
-                Log.d(TAG, "response: %s -> %s", response, response.body().string());
-            }
-        });
-    }
-
-    public Request authedRequest(String method, String path, String body) {
-        String timestamp = String.valueOf(new Date().getTime() / 1000);
-
-        return new Request.Builder()
-                .url(GDAX_API_URL +  path)
-                .method(method, body != null ? RequestBody.create(JSON_MEDIA_TYPE, body) : null)
-                .addHeader("CB-ACCESS-KEY", apiKey)
-                .addHeader("CB-ACCESS-SIGN", sign(apiSecretKey, path, method, body, timestamp))
-                .addHeader("CB-ACCESS-TIMESTAMP", timestamp)
-                .addHeader("CB-ACCESS-PASSPHRASE", apiPassphrase)
-                .build();
-    }
-
-    public void getAccounts() {
-        final Request req = authedRequest("GET", GDAX_ACCOUNT_ENDPOINT, null);
-        client.newCall(req).enqueue(new Callback() {
-            @Override
-            public void onFailure(final Call call, final IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(final Call call, final Response response) throws IOException {
-                Log.d(TAG, "response: %s -> %s", response, response.body().string());
-            }
-        });
-    }
-
-    private List<Order> buildBins(JsonObject obj, String key) {
-        JsonArray array = obj.getAsJsonArray(key).getAsJsonArray();
-        List<Order> rv = new ArrayList<>();
-
-        for (int i=0; i<array.size(); i++) {
-            JsonArray row = array.get(i).getAsJsonArray();
-
-            BigDecimal price = row.get(0).getAsBigDecimal();
-            BigDecimal size = row.get(1).getAsBigDecimal();
-            String order_id = row.get(2).getAsString();
-            Order order = new Order(order_id, price, size);
-            rv.add(order);
-        }
-
-        return rv;
-    }
-
-    public OrderBookSnapshot getOrderBookSnapshot() {
-        final Request req = new Request.Builder().url(GDAX_ORDER_BOOK_SNAPSHOT_URL).build();
-        OrderBookSnapshot rv = null;
-        try {
-            Log.d(TAG, "fetching %s...", GDAX_ORDER_BOOK_SNAPSHOT_URL);
-            Response response = client.newCall(req).execute();
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(response.body().charStream()).getAsJsonObject();
-
-            rv = new OrderBookSnapshot();
-            rv.sequence = obj.get("sequence").getAsLong();
-            rv.asks = buildBins(obj, "asks");
-            rv.bids = buildBins(obj, "bids");
-        } catch (IOException e) {
-            Log.e(TAG, "error populating order book: %s", e);
-        }
-        return rv;
+    public boolean isConnected() {
+        return feedSocket != null;
     }
 
     public void disconnect() {
@@ -380,6 +401,42 @@ public class API {
                 listener.onError(t, response);
             }
         });
+    }
+
+    private List<Order> buildBins(JsonObject obj, String key) {
+        JsonArray array = obj.getAsJsonArray(key).getAsJsonArray();
+        List<Order> rv = new ArrayList<>();
+
+        for (int i=0; i<array.size(); i++) {
+            JsonArray row = array.get(i).getAsJsonArray();
+
+            BigDecimal price = row.get(0).getAsBigDecimal();
+            BigDecimal size = row.get(1).getAsBigDecimal();
+            String order_id = row.get(2).getAsString();
+            Order order = new Order(order_id, price, size);
+            rv.add(order);
+        }
+
+        return rv;
+    }
+
+    public OrderBookSnapshot getOrderBookSnapshot() {
+        final Request req = new Request.Builder().url(GDAX_ORDER_BOOK_SNAPSHOT_URL).build();
+        OrderBookSnapshot rv = null;
+        try {
+            Log.d(TAG, "fetching %s...", GDAX_ORDER_BOOK_SNAPSHOT_URL);
+            Response response = client.newCall(req).execute();
+            JsonParser parser = new JsonParser();
+            JsonObject obj = parser.parse(response.body().charStream()).getAsJsonObject();
+
+            rv = new OrderBookSnapshot();
+            rv.sequence = obj.get("sequence").getAsLong();
+            rv.asks = buildBins(obj, "asks");
+            rv.bids = buildBins(obj, "bids");
+        } catch (IOException e) {
+            Log.e(TAG, "error populating order book: %s", e);
+        }
+        return rv;
     }
 
 }

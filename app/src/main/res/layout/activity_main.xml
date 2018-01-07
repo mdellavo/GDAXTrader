@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
@@ -15,5 +16,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:menu="@menu/navigation_items"
+        app:headerLayout="@layout/nav_header"
         />
 </android.support.v4.widget.DrawerLayout>

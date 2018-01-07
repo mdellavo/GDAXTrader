@@ -1,32 +1,53 @@
 package org.quuux.gdax;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.feller.Log;
+import org.quuux.gdax.events.APIError;
+import org.quuux.gdax.events.AccountsLoadError;
+import org.quuux.gdax.events.AccountsUpdated;
+import org.quuux.gdax.model.Account;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = Log.buildTag(MainActivity.class);
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerList;
-
+    private ListView mAccountsList;
+    private AccountAdapter mAccountAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (NavigationView) findViewById(R.id.navigation);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerList = findViewById(R.id.navigation);
         mDrawerLayout.openDrawer(mDrawerList, false);
+
+        mAccountsList = (ListView) mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
+        mAccountAdapter = new AccountAdapter(this);
+        mAccountsList.setAdapter(mAccountAdapter);
 
         mDrawerList.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -51,11 +72,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
+        mAccountAdapter.update();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -77,6 +101,33 @@ public class MainActivity extends AppCompatActivity {
         return rv;
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAPIError(APIError event) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.api_error_title);
+
+        String message = "";
+        if (event.message != null)
+            message += event.message;
+
+        if (event.status > 0)
+            message += String.format(getString(R.string.api_error_http_message), event.status);
+
+        builder.setMessage(message);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAccountsUpdated(AccountsUpdated event) {
+        mAccountAdapter.update();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAccountsLoadError(AccountsLoadError event) {
+        mAccountAdapter.clear();
+    }
+
     private void launchSignIn() {
         startActivity(new Intent(this, SignInActivity.class));
     }
@@ -85,74 +136,48 @@ public class MainActivity extends AppCompatActivity {
         startActivity(new Intent(this, SetupActivity.class));
     }
 
-//    private void connect(OrderBookService service) {
-//        this.service = service;
-//        this.service.connectToFeed(listener);
-//        OrderBook orderBook = MainActivity.this.service.getOrderBook();
-//        adapter = new OrderBookAdapter(MainActivity.this, orderBook);
-//
-//        depth.setOrderBook(orderBook);
-//    }
-//
-//    private void updateOrderBook() {
-//
-//        long t1 = System.currentTimeMillis();
-//        adapter.update();
-//        long t2 = System.currentTimeMillis();
-//
-//        Log.d(TAG, "updating adapter took %sms", t2 - t1);
-//
-//        if (orders.getAdapter() == null && adapter.getCount() > 0) {
-//            orders.setAdapter(adapter);
-//            orders.setSelection(adapter.getMarkerPosition() - 5);
-//        }
-//
-//        long t3 = System.currentTimeMillis();
-//        depth.update();
-//        long t4 = System.currentTimeMillis();
-//        Log.d(TAG, "updating view took %sms", t4 - t3);
-//    }
-//
-//    private ServiceConnection connection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName className, IBinder service) {
-//            OrderBookService.LocalBinder binder = (OrderBookService.LocalBinder) service;
-//            connect(binder.getService());
-//            bound = true;
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName arg0) {
-//            bound = false;
-//        }
-//    };
-//
-//    final API.FeedListener listener = new API.FeedListener() {
-//        @Override
-//        public void onMessage(final FeedMessage message) {
-//        }
-//
-//        @Override
-//        public void onSnapshot(final API.OrderBookSnapshot snapshot) {
-//            handler.post(updater);
-//        }
-//
-//        @Override
-//        public void onError(final Throwable t, final Response response) {
-//
-//        }
-//
-//        @Override
-//        public void onClosed(final int code, final String reason) {
-//
-//        }
-//    };
-//
-//    private Runnable updater = new Runnable() {
-//        @Override
-//        public void run() {
-//            updateOrderBook();
-//            handler.postDelayed(updater, 5000);
-//        }
-//    };
+    static class AccountTag {
+        TextView currency, balance;
+    }
+
+    class AccountAdapter extends ArrayAdapter<Account> {
+        public AccountAdapter(Context context) {
+            super(context, 0);
+            setNotifyOnChange(true);
+        }
+
+        @NonNull
+        @Override
+        public View getView(final int position, @Nullable View view, @NonNull final ViewGroup parent) {
+            if (view == null)
+                view = newView(parent);
+
+            Account account = getItem(position);
+            bindView(view, account);
+
+            return view;
+        }
+
+        private void bindView(final View view, final Account account) {
+            AccountTag tag = (AccountTag) view.getTag();
+            tag.currency.setText(account.currency);
+            tag.balance.setText(account.balance);
+        }
+
+        private View newView(final ViewGroup parent) {
+            final View view = getLayoutInflater().inflate(R.layout.accont_item, parent, false);
+            AccountTag tag = new AccountTag();
+            tag.currency = view.findViewById(R.id.currency);
+            tag.balance = view.findViewById(R.id.balance);
+            view.setTag(tag);
+            return view;
+        }
+
+
+        public void update() {
+            clear();
+            addAll(Datastore.getInstance().getAccounts());
+        }
+    }
+
 }

@@ -9,4 +9,6 @@
     <string name="api_passphrase">Passphrase</string>
     <string name="not_empty">This field cannot be empty</string>
     <string name="setup">Setup</string>
+    <string name="api_error_title">An unexpected error occurred</string>
+    <string name="api_error_http_message">(HTTP Response: %d)</string>
 </resources>

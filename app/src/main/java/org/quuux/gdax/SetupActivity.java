@@ -46,9 +46,7 @@ public class SetupActivity extends AppCompatActivity {
             API api = API.getInstance();
 
             api.setApiKey(apiKey, apiSecret, apiPassphrase);
-            api.getAccounts();
-
-            //finish();
+            finish();
         }
     }
 
