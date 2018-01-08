@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -99,6 +102,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return rv;
+    }
+
+    private void swapFrag(final Fragment frag, final String tag, final boolean addToBackStack) {
+        final FragmentManager fm = getSupportFragmentManager();
+        final FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.content_frame, frag, tag);
+        if (addToBackStack)
+            ft.addToBackStack(null);
+        ft.commit();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

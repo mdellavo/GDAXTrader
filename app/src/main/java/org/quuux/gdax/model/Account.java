@@ -1,7 +1,9 @@
 package org.quuux.gdax.model;
 
 
-public class Account {
+import java.io.Serializable;
+
+public class Account implements Serializable {
     public String id;
     public String currency;
     public String balance;

@@ -1,5 +1,7 @@
 package org.quuux.gdax.model;
 
 
-public class AccountActivity {
+import java.io.Serializable;
+
+public class AccountActivity implements Serializable {
 }
