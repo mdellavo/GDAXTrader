@@ -14,6 +14,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.SubscribeMessage;
@@ -56,7 +57,8 @@ public class API {
     private static final String CLIENT_SECRET = "cac3c43f727379cd7aeee0958d1c007561b6c52ff55ddd62d2b461db1cb57b74";
 
     private static final String GDAX_API_URL = "https://api.gdax.com";
-    private static final String GDAX_ACCOUNTS_URL = GDAX_API_URL + "/accounts";
+    private static final String GDAX_ACCOUNTS_ENDPOINT = "/accounts";
+    private static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -105,6 +107,10 @@ public class API {
     interface ResponseListener<T> {
         void onSuccess(T result);
         void onError(APIError error);
+    }
+
+    interface PaginatedResponseListener<T> extends ResponseListener<T> {
+        void onSuccess(T result, String before, String after);
     }
 
     private static API instance;
@@ -206,10 +212,10 @@ public class API {
     }
 
    class APICallback<T> implements Callback {
-       private final ResponseListener<T> listener;
-       private final Class<T> cls;
+       public final ResponseListener<T> listener;
+       public final Class<T> cls;
 
-       public APICallback(final ResponseListener listener, Class<T> cls) {
+       public APICallback(final ResponseListener<T> listener, Class<T> cls) {
            this.listener = listener;
            this.cls = cls;
        }
@@ -223,40 +229,94 @@ public class API {
 
         @Override
         public void onResponse(final Call call, final Response response) throws IOException {
-            int code = response.code();
-            ResponseBody body = response.body();
-
-            switch (code) {
+            switch (response.code()) {
                 case 200:
-                    T result = null;
-                    if (body != null) {
-                        String bodys = body.string();
-                        Log.d(TAG, "body: %s", bodys);
-                        result = gson.fromJson(bodys, cls);
-                    }
-                    listener.onSuccess(result);
+                    onSuccess(response);
                     break;
 
                 default:
-                    String message;
-                    if (body != null)
-                        message = body.string();
-                    else
-                        message = response.message();
-                    APIError error = new APIError(code, message);
-                    listener.onError(error);
-                    EventBus.getDefault().post(error);
+                    onError(response);
                     break;
             }
         }
+
+       public void onError(final Response response) throws IOException {
+           String message;
+           ResponseBody body = response.body();
+           if (body != null)
+               message = body.string();
+           else
+               message = response.message();
+           APIError error = new APIError(response.code(), message);
+           listener.onError(error);
+           EventBus.getDefault().post(error);
+       }
+
+       public T getBody(Response response) throws IOException {
+           T result = null;
+           ResponseBody body = response.body();
+           if (body != null) {
+               String bodys = body.string();
+               Log.d(TAG, "body: %s", bodys);
+               result = gson.fromJson(bodys, cls);
+           }
+           return result;
+       }
+
+       public void onSuccess(Response response) throws IOException {
+            listener.onSuccess(getBody(response));
+        }
     }
 
-    public void getAccounts(ResponseListener<Account[]> listener) {
+    class PaginatedAPICallback<T> extends APICallback<T> {
+        PaginatedResponseListener<T> listener;
+
+        public PaginatedAPICallback(final PaginatedResponseListener<T> listener, final Class<T> cls) {
+            super(listener, cls);
+        }
+
+        public void onSuccess(Response response) throws IOException {
+            String before = response.header("CB-BEFORE");
+            String after = response.header("CB-AFTER");
+            listener.onSuccess(getBody(response), before, after);
+        }
+    }
+
+    private String apiUrl(String endpoint) {
+        return GDAX_API_URL + endpoint;
+    }
+
+    private Request newRequest(String method, String url, RequestBody body) {
         final Request req = new Request.Builder()
-                .get()
-                .url(GDAX_ACCOUNTS_URL)
+                .method(method, body)
+                .url(url)
                 .build();
-        client.newCall(req).enqueue(new APICallback<>(listener, Account[].class));
+        return req;
+    }
+
+    private <T> void makeRequest(Request request, APICallback<T> callback) {
+        client.newCall(request).enqueue(callback);
+    }
+
+    private <T> void apiCall(String method, String endpoint, ResponseListener<T> listener, Class<T> cls) {
+        makeRequest(newRequest(method, apiUrl(endpoint), null), new APICallback<>(listener, cls));
+    }
+
+    private <T> void paginatedApiCall(String method, String endpoint, PaginatedResponseListener<T> listener, Class<T> cls) {
+        makeRequest(newRequest(method, apiUrl(endpoint), null), new PaginatedAPICallback<>(listener, cls));
+    }
+
+
+    public void getAccounts(ResponseListener<Account[]> listener) {
+        apiCall("GET", GDAX_ACCOUNTS_ENDPOINT, listener, Account[].class);
+    }
+
+    public String accountLedgerEndpoint(Account account) {
+        return String.format(GDAX_ACCOUNT_LEDGER_ENDPOINT, account.id);
+    }
+
+    public void getAccountHistory(Account account, PaginatedResponseListener<AccountActivity[]> listener) {
+        paginatedApiCall("GET", accountLedgerEndpoint(account), listener, AccountActivity[].class);
     }
 
     // Oauth
