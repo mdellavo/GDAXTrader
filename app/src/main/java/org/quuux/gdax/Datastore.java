@@ -5,10 +5,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
+import org.quuux.gdax.events.PageLoadError;
+import org.quuux.gdax.events.PageLoaded;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.model.AccountActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Datastore {
@@ -45,5 +49,71 @@ public class Datastore {
                 EventBus.getDefault().post(new AccountsLoadError());
             }
         });
+    }
+
+    public void loadAccountHistory(final Account account) {
+        API.getInstance().getAccountHistory(account, new API.PaginatedResponseListener<AccountActivity[]>() {
+
+
+            @Override
+            public void onSuccess(final AccountActivity[] result, final String before, final String after) {
+
+            }
+
+            @Override
+            public void onError(final APIError error) {
+
+            }
+        });
+    }
+
+    public static abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
+        String before, after;
+        List<T> items = new ArrayList<>();
+
+        public List<T> getItems() {
+            return items;
+        }
+
+        abstract public Class<T[]> getPageClass();
+
+        public void load() {
+            API api = API.getInstance();
+            api.loadPage(getEndpoint(), this, getPageClass());
+        }
+
+        abstract String getEndpoint();
+
+        @Override
+        public void onSuccess(final T[] result, final String before, final String after) {
+            Collections.addAll(items, result);
+            this.before = before;
+            this.after = after;
+            EventBus.getDefault().post(new PageLoaded(this));
+        }
+
+        @Override
+        public void onError(final APIError error) {
+            EventBus.getDefault().post(new PageLoadError(this, error));
+        }
+    }
+
+    public static class AccountActivityCursor extends Cursor<AccountActivity> {
+
+        private final Account account;
+
+        public AccountActivityCursor(Account account) {
+            this.account = account;
+        }
+
+        @Override
+        public Class<AccountActivity[]> getPageClass() {
+            return AccountActivity[].class;
+        }
+
+        @Override
+        String getEndpoint() {
+            return API.getInstance().accountLedgerEndpoint(account);
+        }
     }
 }

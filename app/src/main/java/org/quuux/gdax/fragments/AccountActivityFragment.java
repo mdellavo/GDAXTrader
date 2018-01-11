@@ -1,14 +1,18 @@
 package org.quuux.gdax.fragments;
 
 
+import android.content.Context;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.greenrobot.eventbus.EventBus;
+import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.view.SimpleArrayAdapter;
 
 public class AccountActivityFragment extends Fragment {
     private static final String ARG_ACCOUNT = "account";
@@ -31,6 +35,9 @@ public class AccountActivityFragment extends Fragment {
         if (getArguments() != null) {
             mAccount = (Account) getArguments().getSerializable(ARG_ACCOUNT);
         }
+
+        Datastore.AccountActivityCursor cursor = new Datastore.AccountActivityCursor(mAccount);
+        cursor.load();
     }
 
     @Override

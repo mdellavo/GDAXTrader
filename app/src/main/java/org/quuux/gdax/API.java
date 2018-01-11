@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -109,8 +110,9 @@ public class API {
         void onError(APIError error);
     }
 
-    interface PaginatedResponseListener<T> extends ResponseListener<T> {
+    interface PaginatedResponseListener<T> {
         void onSuccess(T result, String before, String after);
+        void onError(APIError error);
     }
 
     private static API instance;
@@ -224,7 +226,6 @@ public class API {
         public void onFailure(final Call call, final IOException e) {
            APIError error = new APIError(0, e.getMessage());
            listener.onError(error);
-           EventBus.getDefault().post(error);
        }
 
         @Override
@@ -272,7 +273,8 @@ public class API {
         PaginatedResponseListener<T> listener;
 
         public PaginatedAPICallback(final PaginatedResponseListener<T> listener, final Class<T> cls) {
-            super(listener, cls);
+            super(null, cls);
+            this.listener = listener;
         }
 
         public void onSuccess(Response response) throws IOException {
@@ -298,12 +300,12 @@ public class API {
         client.newCall(request).enqueue(callback);
     }
 
-    private <T> void apiCall(String method, String endpoint, ResponseListener<T> listener, Class<T> cls) {
+    public <T> void apiCall(String method, String endpoint, ResponseListener<T> listener, Class<T> cls) {
         makeRequest(newRequest(method, apiUrl(endpoint), null), new APICallback<>(listener, cls));
     }
 
-    private <T> void paginatedApiCall(String method, String endpoint, PaginatedResponseListener<T> listener, Class<T> cls) {
-        makeRequest(newRequest(method, apiUrl(endpoint), null), new PaginatedAPICallback<>(listener, cls));
+    public <T> void loadPage(String endpoint, PaginatedResponseListener<T> listener, Class<T> cls) {
+        makeRequest(newRequest("GET", apiUrl(endpoint), null), new PaginatedAPICallback<>(listener, cls));
     }
 
 
@@ -316,7 +318,7 @@ public class API {
     }
 
     public void getAccountHistory(Account account, PaginatedResponseListener<AccountActivity[]> listener) {
-        paginatedApiCall("GET", accountLedgerEndpoint(account), listener, AccountActivity[].class);
+        loadPage(accountLedgerEndpoint(account), listener, AccountActivity[].class);
     }
 
     // Oauth

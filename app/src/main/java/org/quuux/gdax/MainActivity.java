@@ -5,18 +5,19 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -28,7 +29,9 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
+import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.view.SimpleArrayAdapter;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -48,9 +51,17 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList = findViewById(R.id.navigation);
         mDrawerLayout.openDrawer(mDrawerList, false);
 
-        mAccountsList = (ListView) mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
+        mAccountsList = mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
         mAccountAdapter = new AccountAdapter(this);
         mAccountsList.setAdapter(mAccountAdapter);
+        mAccountsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(final AdapterView parent, final View view, final int position, final long id) {
+                Account account = mAccountAdapter.getItem(position);
+                Log.d(TAG, "clicked account: %s", account);
+                showAccountActivity(account);
+            }
+        });
 
         mDrawerList.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -113,6 +124,15 @@ public class MainActivity extends AppCompatActivity {
         ft.commit();
     }
 
+    private void showAccountActivity(Account account) {
+        String tag = "account-activity-" + account.id;
+        final FragmentManager fm = getSupportFragmentManager();
+        Fragment frag = fm.findFragmentByTag(tag);
+        if (frag == null)
+            frag = AccountActivityFragment.newInstance(account);
+        swapFrag(frag, tag, false);
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAPIError(APIError event) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -152,43 +172,33 @@ public class MainActivity extends AppCompatActivity {
         TextView currency, balance;
     }
 
-    class AccountAdapter extends ArrayAdapter<Account> {
-        public AccountAdapter(Context context) {
-            super(context, 0);
-            setNotifyOnChange(true);
+    class AccountAdapter extends SimpleArrayAdapter<Account> {
+
+
+        public AccountAdapter(final Context context) {
+            super(context);
         }
 
-        @NonNull
+        public void update() {
+            clear();
+            addAll(Datastore.getInstance().getAccounts());
+        }
+
         @Override
-        public View getView(final int position, @Nullable View view, @NonNull final ViewGroup parent) {
-            if (view == null)
-                view = newView(parent);
-
-            Account account = getItem(position);
-            bindView(view, account);
-
-            return view;
-        }
-
-        private void bindView(final View view, final Account account) {
+        public void bindView(final int position, final View view, final Account account) {
             AccountTag tag = (AccountTag) view.getTag();
             tag.currency.setText(account.currency);
             tag.balance.setText(account.balance);
         }
 
-        private View newView(final ViewGroup parent) {
+        @Override
+        public View newView(final int position, final ViewGroup parent) {
             final View view = getLayoutInflater().inflate(R.layout.accont_item, parent, false);
             AccountTag tag = new AccountTag();
             tag.currency = view.findViewById(R.id.currency);
             tag.balance = view.findViewById(R.id.balance);
             view.setTag(tag);
             return view;
-        }
-
-
-        public void update() {
-            clear();
-            addAll(Datastore.getInstance().getAccounts());
         }
     }
 
