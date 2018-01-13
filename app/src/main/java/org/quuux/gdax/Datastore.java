@@ -51,22 +51,6 @@ public class Datastore {
         });
     }
 
-    public void loadAccountHistory(final Account account) {
-        API.getInstance().getAccountHistory(account, new API.PaginatedResponseListener<AccountActivity[]>() {
-
-
-            @Override
-            public void onSuccess(final AccountActivity[] result, final String before, final String after) {
-
-            }
-
-            @Override
-            public void onError(final APIError error) {
-
-            }
-        });
-    }
-
     public static abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
         String before, after;
         List<T> items = new ArrayList<>();

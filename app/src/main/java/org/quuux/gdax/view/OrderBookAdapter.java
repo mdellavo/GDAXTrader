@@ -127,7 +127,7 @@ public class OrderBookAdapter extends BaseAdapter {
         final Holder holder = (Holder) view.getTag();
         holder.side.setText(item.side.name());
         holder.price.setText(Util.currencyFormat(item.bin.price));
-        holder.size.setText(Util.decimalFormat(item.bin.size) + " btc");
+        holder.size.setText(Util.shortDecimalFormat(item.bin.size) + " btc");
         holder.num_orders.setText(String.format("%d orders", item.bin.num_orders));
     }
 

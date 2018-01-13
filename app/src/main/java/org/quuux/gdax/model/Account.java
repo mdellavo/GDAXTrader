@@ -2,12 +2,13 @@ package org.quuux.gdax.model;
 
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class Account implements Serializable {
     public String id;
     public String currency;
-    public String balance;
-    public String available;
-    public String hold;
+    public BigDecimal balance;
+    public BigDecimal available;
+    public BigDecimal hold;
     public String profile_id;
 }

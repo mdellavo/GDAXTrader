@@ -5,7 +5,7 @@ import java.util.Date;
 public class FeedMessage {
     public String order_id;
     public long sequence;
-    public Date Time;
+    public Date time;
     public String type;
     public String order_type;
     public String product_id;

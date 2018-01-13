@@ -3,6 +3,8 @@ package org.quuux.gdax.view;
 import android.content.Context;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.events.PageLoadError;
 import org.quuux.gdax.events.PageLoaded;
@@ -23,6 +25,7 @@ public abstract class CursorAdapter<T> extends SimpleArrayAdapter<T> {
         EventBus.getDefault().unregister(this);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPageLoaded(PageLoaded event) {
         if (event.cursor != cursor)
             return;
@@ -30,6 +33,7 @@ public abstract class CursorAdapter<T> extends SimpleArrayAdapter<T> {
         notifyDataSetChanged();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPageLoadError(PageLoadError event) {
         if (event.cursor != cursor)
             return;

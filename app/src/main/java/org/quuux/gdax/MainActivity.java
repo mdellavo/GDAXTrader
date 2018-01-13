@@ -3,7 +3,6 @@ package org.quuux.gdax;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -188,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         public void bindView(final int position, final View view, final Account account) {
             AccountTag tag = (AccountTag) view.getTag();
             tag.currency.setText(account.currency);
-            tag.balance.setText(account.balance);
+            tag.balance.setText(Util.longDecimalFormat(account.balance));
         }
 
         @Override
