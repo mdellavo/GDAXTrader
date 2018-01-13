@@ -62,11 +62,17 @@ public class AccountActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.fragment_account_activity, container, false);
         mList = v.findViewById(R.id.list);
+
+        View headerView = inflater.inflate(R.layout.account_activity_header, null);
+        mList.addHeaderView(headerView, null, false);
+
+        mList.setEmptyView(v.findViewById(R.id.empty));
+
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
-                AccountActivity activity = mAdapter.getItem(position);
+                AccountActivity activity = (AccountActivity) mList.getItemAtPosition(position);
                 show(activity);
             }
         });

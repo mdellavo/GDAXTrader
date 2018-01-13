@@ -17,5 +17,8 @@
     <string name="created_at">Created at</string>
     <string name="amount">Amount</string>
     <string name="balance">Balance</string>
+    <string name="type">Type</string>
+    <string name="date">Date</string>
+    <string name="no_activity">No activity</string>
 
 </resources>
