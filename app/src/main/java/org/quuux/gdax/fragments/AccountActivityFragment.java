@@ -4,9 +4,11 @@ package org.quuux.gdax.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -61,7 +63,39 @@ public class AccountActivityFragment extends Fragment {
         View v =  inflater.inflate(R.layout.fragment_account_activity, container, false);
         mList = v.findViewById(R.id.list);
         mList.setAdapter(mAdapter);
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
+                AccountActivity activity = mAdapter.getItem(position);
+                show(activity);
+            }
+        });
         return v;
+    }
+
+    private void show(final AccountActivity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(activity.type);
+
+        final View v = getLayoutInflater().inflate(R.layout.account_activity_details, null);
+
+        TextView id = v.findViewById(R.id.id);
+        id.setText(activity.id);
+
+        TextView created_at = v.findViewById(R.id.created_at);
+        created_at.setText(activity.created_at.toString());
+
+        TextView amount = v.findViewById(R.id.amount);
+        amount.setText(activity.amount.toPlainString());
+
+        TextView balance = v.findViewById(R.id.balance);
+        balance.setText(activity.balance.toPlainString());
+
+        builder.setView(v);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
     static class AccountActivityViewTag {
