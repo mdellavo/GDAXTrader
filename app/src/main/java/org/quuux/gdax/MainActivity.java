@@ -2,6 +2,7 @@ package org.quuux.gdax;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
@@ -9,8 +10,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +31,7 @@ import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.fragments.AccountActivityFragment;
+import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.view.SimpleArrayAdapter;
 
@@ -35,19 +39,32 @@ import org.quuux.gdax.view.SimpleArrayAdapter;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = Log.buildTag(MainActivity.class);
+
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerList;
     private ListView mAccountsList;
     private AccountAdapter mAccountAdapter;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerList = findViewById(R.id.navigation);
         mDrawerLayout.openDrawer(mDrawerList, false);
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,0, 0);
+
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         mAccountsList = mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
         mAccountAdapter = new AccountAdapter(this);
@@ -69,16 +86,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private boolean onNavSelected(final MenuItem item) {
-        boolean rv = false;
-        switch (item.getItemId()) {
-            case R.id.setup:
-                launchSetup();
-                rv = true;
-                break;
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
 
-        }
-        return rv;
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -103,6 +121,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         boolean rv;
         switch (item.getItemId()) {
             default:
@@ -113,6 +135,11 @@ public class MainActivity extends AppCompatActivity {
         return rv;
     }
 
+    private Fragment findFragmentByTag(String tag) {
+        final FragmentManager fm = getSupportFragmentManager();
+        return fm.findFragmentByTag(tag);
+    }
+
     private void swapFrag(final Fragment frag, final String tag, final boolean addToBackStack) {
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
@@ -120,14 +147,40 @@ public class MainActivity extends AppCompatActivity {
         if (addToBackStack)
             ft.addToBackStack(null);
         ft.commit();
+
+        if (mDrawerLayout.isDrawerOpen(mDrawerList))
+            mDrawerLayout.closeDrawer(mDrawerList, true);
+
+    }
+
+    private boolean onNavSelected(final MenuItem item) {
+        boolean rv = false;
+        switch (item.getItemId()) {
+            case R.id.setup:
+                launchSetup();
+                rv = true;
+                break;
+
+            case R.id.place_order:
+                showPlaceOrder();
+                rv = true;
+                break;
+
+        }
+        return rv;
     }
 
     private void showAccountActivity(Account account) {
         String tag = "account-activity-" + account.id;
-        final FragmentManager fm = getSupportFragmentManager();
-        Fragment frag = fm.findFragmentByTag(tag);
+        Fragment frag = findFragmentByTag(tag);
         if (frag == null)
             frag = AccountActivityFragment.newInstance(account);
+        swapFrag(frag, tag, false);
+    }
+
+    private void showPlaceOrder() {
+        String tag = "place-order";
+        Fragment frag = PlaceOrderFragment.newInstance();
         swapFrag(frag, tag, false);
     }
 

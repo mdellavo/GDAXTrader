@@ -21,4 +21,13 @@
     <string name="date">Date</string>
     <string name="no_activity">No activity</string>
 
+    <string name="place_order">Place Order</string>
+    <string name="deposit">Deposit</string>
+    <string name="withdraw">Withdraw</string>
+    <string name="orders">Orders</string>
+    <string name="fills">Fills</string>
+    <string name="market">Market</string>
+    <string name="limit">Limit</string>
+    <string name="stop">Stop</string>
+
 </resources>

@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group>
+        <item
+            android:id="@+id/place_order"
+            android:title="@string/place_order" />
+
+        <item
+            android:id="@+id/orders"
+            android:title="@string/orders" />
+        <item
+            android:id="@+id/fills"
+            android:title="@string/fills" />
+
+        <item
+            android:id="@+id/deposit"
+            android:title="@string/deposit" />
+        <item
+            android:id="@+id/withdraw"
+            android:title="@string/withdraw" />
+
         <item
             android:id="@+id/setup"
             android:title="@string/setup" />
-        <item
-            android:id="@+id/orderbook"
-            android:title="@string/orderbook" />
     </group>
 </menu>

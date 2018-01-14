@@ -53,7 +53,6 @@ public abstract class CursorFragment extends Fragment {
         mAdapter.register();
     }
 
-
     @Override
     public void onStop() {
         super.onStop();
