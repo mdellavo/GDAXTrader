@@ -1,19 +1,13 @@
 package org.quuux.gdax.model;
 
-import java.math.BigDecimal;
-
 public class Order {
-    public final String order_id;
-    public final BigDecimal size;
-    public final BigDecimal price;
 
-    public Order(final String order_id, final BigDecimal price, final BigDecimal size) {
-        this.order_id = order_id;
-        this.size = size;
-        this.price = price;
-    }
+    public String client_oid;
 
-    public Order(final String order_id, final String price, final String size) {
-        this(order_id, new BigDecimal(price), new BigDecimal(size));
-    }
+    public String type;
+    public String side;
+    public String size;
+    public String product_id;
+
+    public String price;  // limit orders
 }

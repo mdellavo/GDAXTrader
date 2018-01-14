@@ -29,5 +29,10 @@
     <string name="market">Market</string>
     <string name="limit">Limit</string>
     <string name="stop">Stop</string>
+    <string name="amount_zero">0.00</string>
+    <string name="buy">Buy</string>
+    <string name="sell">Sell</string>
+    <string name="error_amount_not_greater_than_zero">Amount must be greater than zero</string>
+    <string name="error_amount_not_valid">Amount is not valid</string>
 
 </resources>

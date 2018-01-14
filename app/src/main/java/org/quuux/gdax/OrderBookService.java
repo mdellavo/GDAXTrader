@@ -8,7 +8,7 @@ import android.os.IBinder;
 
 import org.quuux.feller.Log;
 import org.quuux.gdax.model.FeedMessage;
-import org.quuux.gdax.model.Order;
+import org.quuux.gdax.model.OrderBookEntry;
 import org.quuux.gdax.model.OrderBook;
 
 import java.math.BigDecimal;
@@ -93,7 +93,7 @@ public class OrderBookService extends Service {
         orderBook.setSequence(message.sequence);
 
         if (message.type.equals("received") && message.price != null) {
-            Order order = new Order(message.order_id, new BigDecimal(message.price), new BigDecimal(message.size));
+            OrderBookEntry order = new OrderBookEntry(message.order_id, new BigDecimal(message.price), new BigDecimal(message.size));
             orderBook.addOrder(order);
         } else if (message.type.equals("done")) {
             orderBook.removeOrder(message.order_id);
@@ -107,12 +107,12 @@ public class OrderBookService extends Service {
     private void processSnapshot(final API.OrderBookSnapshot snapshot) {
         Log.d(TAG, "processing snapshot...");
 
-        for (Order order : snapshot.bids) {
+        for (OrderBookEntry order : snapshot.bids) {
             orderBook.addOrder(order);
             orderBook.incDepth(OrderBook.Side.buy, order.price, order.size);
         }
 
-        for (Order order : snapshot.asks) {
+        for (OrderBookEntry order : snapshot.asks) {
             orderBook.addOrder(order);
             orderBook.incDepth(OrderBook.Side.sell, order.price, order.size);
         }

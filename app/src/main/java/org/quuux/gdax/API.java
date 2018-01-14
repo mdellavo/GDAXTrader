@@ -17,6 +17,7 @@ import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
+import org.quuux.gdax.model.OrderBookEntry;
 import org.quuux.gdax.model.SubscribeMessage;
 
 import java.io.IOException;
@@ -24,7 +25,6 @@ import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -77,8 +77,8 @@ public class API {
 
     static class OrderBookSnapshot {
         long sequence;
-        List<Order> bids;
-        List<Order> asks;
+        List<OrderBookEntry> bids;
+        List<OrderBookEntry> asks;
     }
 
     static class TokenResponse {
@@ -321,6 +321,9 @@ public class API {
         loadPage(accountLedgerEndpoint(account), listener, AccountActivity[].class);
     }
 
+    public void placeOrder(final Order order) {
+    }
+
     // Oauth
 
     public String getOAuthUrl() {
@@ -465,9 +468,9 @@ public class API {
         });
     }
 
-    private List<Order> buildBins(JsonObject obj, String key) {
+    private List<OrderBookEntry> buildBins(JsonObject obj, String key) {
         JsonArray array = obj.getAsJsonArray(key).getAsJsonArray();
-        List<Order> rv = new ArrayList<>();
+        List<OrderBookEntry> rv = new ArrayList<>();
 
         for (int i=0; i<array.size(); i++) {
             JsonArray row = array.get(i).getAsJsonArray();
@@ -475,7 +478,7 @@ public class API {
             BigDecimal price = row.get(0).getAsBigDecimal();
             BigDecimal size = row.get(1).getAsBigDecimal();
             String order_id = row.get(2).getAsString();
-            Order order = new Order(order_id, price, size);
+            OrderBookEntry order = new OrderBookEntry(order_id, price, size);
             rv.add(order);
         }
 

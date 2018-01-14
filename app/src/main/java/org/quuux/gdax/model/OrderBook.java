@@ -22,7 +22,7 @@ public class OrderBook {
     }
 
     private long sequence;
-    private HashMap<String, Order> orders = new HashMap<>();
+    private HashMap<String, OrderBookEntry> orders = new HashMap<>();
     private TreeMap<BigDecimal, OrderBookBin> buyHist = new TreeMap<>();
     private TreeMap<BigDecimal, OrderBookBin> sellHist = new TreeMap<>();
 
@@ -70,7 +70,7 @@ public class OrderBook {
         bin.num_orders += 1;
     }
 
-    public void addOrder(Order order) {
+    public void addOrder(OrderBookEntry order) {
         orders.put(order.order_id, order);
     }
 
