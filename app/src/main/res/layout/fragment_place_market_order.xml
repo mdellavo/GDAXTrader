@@ -15,10 +15,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <RadioButton
+            android:id="@+id/buy"
             android:text="@string/buy"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:checked="true"
+            />
         <RadioButton
+            android:id="@+id/sell"
             android:text="@string/sell"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

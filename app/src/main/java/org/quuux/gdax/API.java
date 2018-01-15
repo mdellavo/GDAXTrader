@@ -18,6 +18,7 @@ import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.OrderBookEntry;
+import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.SubscribeMessage;
 
 import java.io.IOException;
@@ -60,6 +61,8 @@ public class API {
     private static final String GDAX_API_URL = "https://api.gdax.com";
     private static final String GDAX_ACCOUNTS_ENDPOINT = "/accounts";
     private static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
+    private static final String GDAX_ORDERS_ENDPOINT = "/orders";
+    private static final String GDAX_PRODUCTS_ENDPOINT = "/products";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -74,6 +77,8 @@ public class API {
     private static final String GDAX_ORDER_BOOK_SNAPSHOT_URL = GDAX_API_URL + "/products/BTC-USD/book?level=3";
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
+
+    enum Method {GET, PUT, POST, DELETE}
 
     static class OrderBookSnapshot {
         long sequence;
@@ -105,12 +110,12 @@ public class API {
         void onToken(TokenResponse token);
     }
 
-    interface ResponseListener<T> {
+    public interface ResponseListener<T> {
         void onSuccess(T result);
         void onError(APIError error);
     }
 
-    interface PaginatedResponseListener<T> {
+    public interface PaginatedResponseListener<T> {
         void onSuccess(T result, String before, String after);
         void onError(APIError error);
     }
@@ -288,9 +293,9 @@ public class API {
         return GDAX_API_URL + endpoint;
     }
 
-    private Request newRequest(String method, String url, RequestBody body) {
+    private Request newRequest(Method method, String url, RequestBody body) {
         final Request req = new Request.Builder()
-                .method(method, body)
+                .method(method.toString(), body)
                 .url(url)
                 .build();
         return req;
@@ -300,17 +305,16 @@ public class API {
         client.newCall(request).enqueue(callback);
     }
 
-    public <T> void apiCall(String method, String endpoint, ResponseListener<T> listener, Class<T> cls) {
+    public <T> void apiCall(Method method, String endpoint, ResponseListener<T> listener, Class<T> cls) {
         makeRequest(newRequest(method, apiUrl(endpoint), null), new APICallback<>(listener, cls));
     }
 
     public <T> void loadPage(String endpoint, PaginatedResponseListener<T> listener, Class<T> cls) {
-        makeRequest(newRequest("GET", apiUrl(endpoint), null), new PaginatedAPICallback<>(listener, cls));
+        makeRequest(newRequest(Method.GET, apiUrl(endpoint), null), new PaginatedAPICallback<>(listener, cls));
     }
 
-
     public void getAccounts(ResponseListener<Account[]> listener) {
-        apiCall("GET", GDAX_ACCOUNTS_ENDPOINT, listener, Account[].class);
+        apiCall(Method.GET, GDAX_ACCOUNTS_ENDPOINT, listener, Account[].class);
     }
 
     public String accountLedgerEndpoint(Account account) {
@@ -321,7 +325,12 @@ public class API {
         loadPage(accountLedgerEndpoint(account), listener, AccountActivity[].class);
     }
 
-    public void placeOrder(final Order order) {
+    public void placeOrder(final Order order, ResponseListener<Order> listener) {
+        apiCall(Method.POST, GDAX_ORDERS_ENDPOINT, listener, Order.class);
+    }
+
+    public void getProducts(ResponseListener<Product[]> listener) {
+        apiCall(Method.GET, GDAX_PRODUCTS_ENDPOINT, listener, Product[].class);
     }
 
     // Oauth

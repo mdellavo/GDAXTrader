@@ -9,8 +9,7 @@ public class GDAXApplication extends Application {
         Settings settings = Settings.get(this);
         if (settings.hasApiKey()) {
             API.getInstance().setApiKey(settings.getApiKey(), settings.getApiSecret(), settings.getApiPassphrase());
-
-            Datastore.getInstance().loadAccounts();
+            Datastore.getInstance().load();
         }
     }
 }

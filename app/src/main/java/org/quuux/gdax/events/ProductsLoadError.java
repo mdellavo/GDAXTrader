@@ -1,10 +1,9 @@
 package org.quuux.gdax.events;
 
-
-public class AccountsLoadError {
+public class ProductsLoadError {
     public final APIError error;
 
-    public AccountsLoadError(final APIError error) {
+    public ProductsLoadError(APIError error) {
         this.error = error;
     }
 }

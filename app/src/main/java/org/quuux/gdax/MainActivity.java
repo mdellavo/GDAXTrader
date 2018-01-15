@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,9 +31,12 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
+import org.quuux.gdax.events.ProductsLoadError;
+import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.view.ProductAdapater;
 import org.quuux.gdax.view.SimpleArrayAdapter;
 
 
@@ -46,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private AccountAdapter mAccountAdapter;
     private ActionBarDrawerToggle mDrawerToggle;
     private Toolbar mToolbar;
+    private Spinner mSpinner;
+    private ProductAdapater mSpinnerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -84,12 +91,28 @@ public class MainActivity extends AppCompatActivity {
                 return onNavSelected(item);
             }
         });
+
+        mSpinner = (Spinner) getLayoutInflater().inflate(R.layout.product_spinner, mToolbar, false);
+        mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts());
+        mSpinner.setAdapter(mSpinnerAdapter);
+        mToolbar.addView(mSpinner);
+
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(final AdapterView<?> parent) {
+
+            }
+        });
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
     }
 
@@ -211,6 +234,16 @@ public class MainActivity extends AppCompatActivity {
         mAccountAdapter.clear();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProductsLoaded(ProductsLoaded event) {
+        mSpinnerAdapter.notifyDataSetChanged();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProductsLoadError(ProductsLoadError event) {
+
+    }
+
     private void launchSignIn() {
         startActivity(new Intent(this, SignInActivity.class));
     }
@@ -252,5 +285,6 @@ public class MainActivity extends AppCompatActivity {
             return view;
         }
     }
+
 
 }

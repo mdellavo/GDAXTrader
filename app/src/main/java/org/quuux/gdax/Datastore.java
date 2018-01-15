@@ -7,8 +7,10 @@ import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.PageLoadError;
 import org.quuux.gdax.events.PageLoaded;
+import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.AccountActivity;
+import org.quuux.gdax.model.Product;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ public class Datastore {
 
     private static Datastore instance;
 
+    private List<Product> products = new ArrayList<>();
     private List<Account> accounts = new ArrayList<>();
 
     protected Datastore() {
@@ -46,9 +49,33 @@ public class Datastore {
 
             @Override
             public void onError(final APIError error) {
-                EventBus.getDefault().post(new AccountsLoadError());
+                EventBus.getDefault().post(new AccountsLoadError(error));
             }
         });
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void loadProducts() {
+        API.getInstance().getProducts(new API.ResponseListener<Product[]>() {
+            @Override
+            public void onSuccess(final Product[] result) {
+                products.clear();
+                Collections.addAll(products, result);
+            }
+
+            @Override
+            public void onError(final APIError error) {
+                EventBus.getDefault().post(new ProductsLoadError(error));
+            }
+        });
+    }
+
+    public void load() {
+        loadAccounts();
+        loadProducts();
     }
 
     public static abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {

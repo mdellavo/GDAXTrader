@@ -7,14 +7,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 
 import org.quuux.gdax.API;
 import org.quuux.gdax.R;
+import org.quuux.gdax.events.APIError;
+import org.quuux.gdax.model.Order;
 
 import java.math.BigDecimal;
 
 public class PlaceMarketOrderFragment extends Fragment {
 
+    RadioGroup mSide;
     EditText mAmountText;
 
     public PlaceMarketOrderFragment() {
@@ -47,6 +51,7 @@ public class PlaceMarketOrderFragment extends Fragment {
         });
 
         mAmountText = v.findViewById(R.id.amount);
+        mSide = v.findViewById(R.id.side);
 
         return v;
     }
@@ -55,18 +60,36 @@ public class PlaceMarketOrderFragment extends Fragment {
         return new BigDecimal(mAmountText.getText().toString());
     }
 
+    private Order.Side getSide() {
+        return mSide.getCheckedRadioButtonId() == R.id.buy ? Order.Side.buy : Order.Side.sell;
+    }
+
     private void onCommit() {
+        Order.Side side = getSide();
+
+        BigDecimal amount;
         try {
-            BigDecimal amount = getAmount();
+            amount = getAmount();
             if (amount.compareTo(BigDecimal.ZERO) >= 0) {
                 mAmountText.setError(getString(R.string.error_amount_not_greater_than_zero));
                 return;
             }
-            
-            API.getInstance().placeOrder(amount);
         } catch (NumberFormatException e) {
             mAmountText.setError(getString(R.string.error_amount_not_valid));
             return;
         }
+
+        API.getInstance().placeOrder(Order.newMarketOrder("BTC-USD", side, amount), new API.ResponseListener<Order>() {
+            @Override
+            public void onSuccess(final Order result) {
+
+            }
+
+            @Override
+            public void onError(final APIError error) {
+
+            }
+        });
+
     }
 }
