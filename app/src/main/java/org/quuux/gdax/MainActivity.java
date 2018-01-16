@@ -92,22 +92,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mSpinner = (Spinner) getLayoutInflater().inflate(R.layout.product_spinner, mToolbar, false);
-        mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts());
-        mSpinner.setAdapter(mSpinnerAdapter);
-        mToolbar.addView(mSpinner);
-
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
-
-            }
-
-            @Override
-            public void onNothingSelected(final AdapterView<?> parent) {
-
-            }
-        });
+        //mSpinner = (Spinner) getLayoutInflater().inflate(R.layout.product_spinner, mToolbar, false);
+        //mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts());
+        //mSpinner.setAdapter(mSpinnerAdapter);
+        //mToolbar.addView(mSpinner);
     }
 
     @Override

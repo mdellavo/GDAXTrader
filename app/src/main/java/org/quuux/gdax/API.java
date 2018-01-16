@@ -305,6 +305,10 @@ public class API {
         client.newCall(request).enqueue(callback);
     }
 
+    public <T> void apiCall(Method method, String endpoint, RequestBody body, ResponseListener<T> listener, Class<T> cls) {
+        makeRequest(newRequest(method, apiUrl(endpoint), body), new APICallback<>(listener, cls));
+    }
+
     public <T> void apiCall(Method method, String endpoint, ResponseListener<T> listener, Class<T> cls) {
         makeRequest(newRequest(method, apiUrl(endpoint), null), new APICallback<>(listener, cls));
     }
@@ -326,7 +330,8 @@ public class API {
     }
 
     public void placeOrder(final Order order, ResponseListener<Order> listener) {
-        apiCall(Method.POST, GDAX_ORDERS_ENDPOINT, listener, Order.class);
+        RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, gson.toJson(order));
+        apiCall(Method.POST, GDAX_ORDERS_ENDPOINT, body, listener, Order.class);
     }
 
     public void getProducts(ResponseListener<Product[]> listener) {

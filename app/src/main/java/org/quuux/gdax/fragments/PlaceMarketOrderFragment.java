@@ -8,18 +8,23 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import org.quuux.gdax.API;
+import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.model.Order;
+import org.quuux.gdax.view.ProductAdapater;
 
 import java.math.BigDecimal;
 
 public class PlaceMarketOrderFragment extends Fragment {
 
-    RadioGroup mSide;
-    EditText mAmountText;
+    private RadioGroup mSide;
+    private EditText mAmountText;
+    private Spinner mSpinner;
+    private ProductAdapater mSpinnerAdapter;
 
     public PlaceMarketOrderFragment() {
     }
@@ -41,6 +46,11 @@ public class PlaceMarketOrderFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.fragment_place_market_order, container, false);
+
+        mSpinner = v.findViewById(R.id.product);
+
+        mSpinnerAdapter = new ProductAdapater(getContext(), Datastore.getInstance().getProducts());
+        mSpinner.setAdapter(mSpinnerAdapter);
 
         Button button = v.findViewById(R.id.commit);
         button.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +80,7 @@ public class PlaceMarketOrderFragment extends Fragment {
         BigDecimal amount;
         try {
             amount = getAmount();
-            if (amount.compareTo(BigDecimal.ZERO) >= 0) {
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                 mAmountText.setError(getString(R.string.error_amount_not_greater_than_zero));
                 return;
             }

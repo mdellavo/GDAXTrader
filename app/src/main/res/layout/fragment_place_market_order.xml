@@ -9,11 +9,19 @@
                 android:paddingBottom="10dp"
     >
 
+    <Spinner
+        android:id="@+id/product"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <RadioGroup
         android:id="@+id/side"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@id/product"
+        android:layout_marginTop="10dp"
+        >
         <RadioButton
             android:id="@+id/buy"
             android:text="@string/buy"
