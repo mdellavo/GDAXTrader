@@ -1,11 +1,13 @@
 package org.quuux.gdax.model;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.UUID;
 
 public class Order {
     public enum Type {market, limit, stop}
     public enum Side {buy, sell}
+    public enum Status {pending, open, active, done, settled, canceled}
 
     public String client_oid;
 
@@ -14,8 +16,9 @@ public class Order {
     public Side side;
     public BigDecimal size;
     public String product_id;
-
-    public BigDecimal price;  // limit orders
+    public BigDecimal price;
+    public Date created_at;
+    public Status status;
 
     public static Order newOrder() {
         Order order = new Order();

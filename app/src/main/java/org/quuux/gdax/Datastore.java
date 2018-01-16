@@ -10,6 +10,7 @@ import org.quuux.gdax.events.PageLoaded;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.AccountActivity;
+import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
 
 import java.util.ArrayList;
@@ -125,6 +126,19 @@ public class Datastore {
         @Override
         String getEndpoint() {
             return API.getInstance().accountLedgerEndpoint(account);
+        }
+    }
+
+    public static class OrdersCursor extends Cursor<Order> {
+
+        @Override
+        public Class<Order[]> getPageClass() {
+            return Order[].class;
+        }
+
+        @Override
+        String getEndpoint() {
+            return API.GDAX_ORDERS_ENDPOINT + "?status=pending";
         }
     }
 }

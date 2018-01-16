@@ -34,6 +34,7 @@ import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.fragments.AccountActivityFragment;
+import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.view.ProductAdapater;
@@ -172,13 +173,24 @@ public class MainActivity extends AppCompatActivity {
                 rv = true;
                 break;
 
+            case R.id.orders:
+                showOrders();
+                break;
+
             case R.id.place_order:
                 showPlaceOrder();
                 rv = true;
                 break;
-
         }
         return rv;
+    }
+
+    private void showOrders() {
+        String tag = "orders";
+        Fragment fragment = findFragmentByTag(tag);
+        if (fragment == null)
+            fragment = OrdersFragment.newInstance();
+        swapFrag(fragment,  tag, false);
     }
 
     private void showAccountActivity(Account account) {

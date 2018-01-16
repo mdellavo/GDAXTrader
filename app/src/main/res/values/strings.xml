@@ -35,4 +35,12 @@
     <string name="error_amount_not_greater_than_zero">Amount must be greater than zero</string>
     <string name="error_amount_not_valid">Amount is not valid</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="side">Side</string>
+    <string name="price">Price</string>
+    <string name="size">Size</string>
+    <string name="status">Status</string>
+    <string name="no_orders">No orders</string>
+
 </resources>

@@ -58,11 +58,11 @@ public class API {
     private static final String CLIENT_ID = "595cdd1b0acc22a78debbf6f9a2a928e2e25482f74132dbd410f549046a98ba9";
     private static final String CLIENT_SECRET = "cac3c43f727379cd7aeee0958d1c007561b6c52ff55ddd62d2b461db1cb57b74";
 
-    private static final String GDAX_API_URL = "https://api.gdax.com";
-    private static final String GDAX_ACCOUNTS_ENDPOINT = "/accounts";
+    public static final String GDAX_API_URL = "https://api.gdax.com";
+    public static final String GDAX_ACCOUNTS_ENDPOINT = "/accounts";
     private static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
-    private static final String GDAX_ORDERS_ENDPOINT = "/orders";
-    private static final String GDAX_PRODUCTS_ENDPOINT = "/products";
+    public static final String GDAX_ORDERS_ENDPOINT = "/orders";
+    public static final String GDAX_PRODUCTS_ENDPOINT = "/products";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -79,6 +79,10 @@ public class API {
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
     enum Method {GET, PUT, POST, DELETE}
+
+    static class ErrorMessage {
+        String message;
+    }
 
     static class OrderBookSnapshot {
         long sequence;
@@ -246,14 +250,22 @@ public class API {
             }
         }
 
+        public APIError getError(final Response response) throws IOException {
+            String message;
+            ResponseBody body = response.body();
+            if (body != null) {
+                String bodyStr = body.string();
+                Log.d(TAG, "error: %s", bodyStr);
+                ErrorMessage errorMessage = gson.fromJson(bodyStr, ErrorMessage.class);
+                message = errorMessage.message;
+            } else {
+                message = response.message();
+            }
+            return new APIError(response.code(), message);
+        }
+
        public void onError(final Response response) throws IOException {
-           String message;
-           ResponseBody body = response.body();
-           if (body != null)
-               message = body.string();
-           else
-               message = response.message();
-           APIError error = new APIError(response.code(), message);
+           APIError error = getError(response);
            listener.onError(error);
            EventBus.getDefault().post(error);
        }
@@ -286,6 +298,13 @@ public class API {
             String before = response.header("CB-BEFORE");
             String after = response.header("CB-AFTER");
             listener.onSuccess(getBody(response), before, after);
+        }
+
+        @Override
+        public void onError(final Response response) throws IOException {
+            APIError error = getError(response);
+            listener.onError(error);
+            EventBus.getDefault().post(error);
         }
     }
 
