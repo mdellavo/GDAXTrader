@@ -138,7 +138,7 @@ public class Datastore {
 
         @Override
         String getEndpoint() {
-            return API.GDAX_ORDERS_ENDPOINT + "?status=pending";
+            return API.GDAX_ORDERS_ENDPOINT + "?status=all";
         }
     }
 }

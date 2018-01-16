@@ -62,8 +62,8 @@ public class OrdersFragment extends CursorFragment {
         public void bindView(final int position, final View view, final Order order) {
             OrderTag tag = (OrderTag) view.getTag();
             tag.side.setText(order.side.name());
-            tag.price.setText(order.price.toPlainString());
-            tag.size.setText(order.size.toPlainString());
+            tag.price.setText(order.price != null ? order.price.toPlainString() : "");
+            tag.size.setText(order.size != null ? order.size.toPlainString() : "");
             tag.date.setText(Util.dateFormat(order.created_at));
             tag.status.setText(order.status.name());
         }

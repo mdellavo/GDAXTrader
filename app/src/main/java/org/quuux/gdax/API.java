@@ -1,6 +1,7 @@
 package org.quuux.gdax;
 
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Base64;
 
 import com.google.gson.Gson;
@@ -164,9 +165,13 @@ public class API {
                     body.writeTo(buffer);
                     bodyString = buffer.readUtf8();
                 }
+                String path = originalRequest.url().encodedPath();
+                if (!TextUtils.isEmpty(originalRequest.url().query())) {
+                    path += "?" + originalRequest.url().query();
+                }
                 builder
                         .addHeader("CB-ACCESS-KEY", apiKey)
-                        .addHeader("CB-ACCESS-SIGN", sign(apiSecretKey, originalRequest.url().encodedPath(), originalRequest.method(), bodyString, timestamp))
+                        .addHeader("CB-ACCESS-SIGN", sign(apiSecretKey, path, originalRequest.method(), bodyString, timestamp))
                         .addHeader("CB-ACCESS-TIMESTAMP", timestamp)
                         .addHeader("CB-ACCESS-PASSPHRASE", apiPassphrase);
             }
@@ -210,6 +215,8 @@ public class API {
         String rv = null;
         try {
             String prehash = timestamp + method.toUpperCase() + requestPath + (body != null ? body : "");
+            Log.d(TAG, "prehash: %s", prehash);
+
             byte[] hmacKey = Base64.decode(secret, 0);
             SecretKeySpec keyspec = new SecretKeySpec(hmacKey, "HmacSHA256");
             Mac sha256 =  Mac.getInstance("HmacSHA256");
