@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         public void bindView(final int position, final View view, final Account account) {
             AccountTag tag = (AccountTag) view.getTag();
             tag.currency.setText(account.currency);
-            tag.balance.setText(Util.longDecimalFormat(account.balance));
+            tag.balance.setText(Util.shortFormat(account.balance));
         }
 
         @Override

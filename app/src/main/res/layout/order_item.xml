@@ -17,13 +17,6 @@
         android:textStyle="bold"
         />
     <TextView
-        android:id="@+id/status"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textAlignment="textStart"
-        />
-    <TextView
         android:id="@+id/price"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -44,5 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textAlignment="textEnd"
+        android:textSize="12sp"
+        android:textColor="@android:color/tertiary_text_light"
         />
 </LinearLayout>

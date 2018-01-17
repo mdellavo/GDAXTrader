@@ -17,14 +17,6 @@
         android:textStyle="bold"
         />
 
-    <TextView
-        android:text="@string/date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textStyle="bold"
-        android:textAlignment="textEnd"
-        />
 
     <TextView
         android:text="@string/amount"
@@ -37,6 +29,15 @@
 
     <TextView
         android:text="@string/balance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textStyle="bold"
+        android:textAlignment="textEnd"
+        />
+
+    <TextView
+        android:text="@string/date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

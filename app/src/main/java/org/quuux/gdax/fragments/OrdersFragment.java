@@ -49,7 +49,7 @@ public class OrdersFragment extends CursorFragment {
     }
 
     static class OrderTag {
-        TextView side, price, size, date, status;
+        TextView side, price, size, date;
     }
 
     class OrdersAdapter extends CursorAdapter<Order> {
@@ -62,10 +62,9 @@ public class OrdersFragment extends CursorFragment {
         public void bindView(final int position, final View view, final Order order) {
             OrderTag tag = (OrderTag) view.getTag();
             tag.side.setText(order.side.name());
-            tag.price.setText(order.price != null ? order.price.toPlainString() : "");
-            tag.size.setText(order.size != null ? order.size.toPlainString() : "");
+            tag.price.setText(order.price != null ? Util.currencyFormat(order.price) : "");
+            tag.size.setText(order.size != null ? Util.shortFormat(order.size) : "");
             tag.date.setText(Util.dateFormat(order.created_at));
-            tag.status.setText(order.status.name());
         }
 
         @Override
@@ -76,7 +75,6 @@ public class OrdersFragment extends CursorFragment {
             tag.price = v.findViewById(R.id.price);
             tag.size = v.findViewById(R.id.size);
             tag.date = v.findViewById(R.id.date);
-            tag.status = v.findViewById(R.id.status);
             v.setTag(tag);
             return v;
         }

@@ -68,10 +68,10 @@ public class AccountActivityFragment extends CursorFragment {
         created_at.setText(activity.created_at.toString());
 
         TextView amount = v.findViewById(R.id.amount);
-        amount.setText(activity.amount.toPlainString());
+        amount.setText(Util.longFormat(activity.amount));
 
         TextView balance = v.findViewById(R.id.balance);
-        balance.setText(activity.balance.toPlainString());
+        balance.setText(Util.longFormat(activity.balance));
 
         builder.setView(v);
 
@@ -95,8 +95,8 @@ public class AccountActivityFragment extends CursorFragment {
             AccountActivityViewTag tag = (AccountActivityViewTag) view.getTag();
             tag.type.setText(item.type);
             tag.date.setText(Util.dateFormat(item.created_at));
-            tag.amount.setText(Util.longDecimalFormat(item.amount));
-            tag.balance.setText(Util.longDecimalFormat(item.balance));
+            tag.amount.setText(Util.shortFormat(item.amount));
+            tag.balance.setText(Util.shortFormat(item.balance));
         }
 
         @Override
