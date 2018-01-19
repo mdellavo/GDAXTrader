@@ -19,10 +19,14 @@ public class Util {
     }
 
     public static String shortFormat(BigDecimal n) {
+        if (n == null)
+            return "";
         return SHORT_FORMAT.format(n);
     }
 
     public static String longFormat(BigDecimal n) {
+        if (n == null)
+            return "";
         return LONG_FORMAT.format(n);
     }
 

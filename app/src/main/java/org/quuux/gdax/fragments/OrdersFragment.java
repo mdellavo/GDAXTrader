@@ -3,8 +3,10 @@ package org.quuux.gdax.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import org.quuux.gdax.Datastore;
@@ -43,9 +45,43 @@ public class OrdersFragment extends CursorFragment {
         mAdapter = new OrdersAdapter(getContext(), mCursor);
         setAdapter(mAdapter);
 
-        //setItemClickListener(clickListener);
+        setItemClickListener(clickListener);
 
         super.onCreate(savedInstanceState);
+    }
+
+    private void show(final Order order) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(order.side.name());
+
+        final View v = getLayoutInflater().inflate(R.layout.order_details, null);
+
+        TextView id = v.findViewById(R.id.id);
+        id.setText(order.id);
+
+        TextView product = v.findViewById(R.id.product);
+        product.setText(order.product_id);
+
+        TextView status = v.findViewById(R.id.status);
+        status.setText(order.status.name());
+
+        TextView created_at = v.findViewById(R.id.created_at);
+        created_at.setText(order.created_at.toString());
+
+        TextView type = v.findViewById(R.id.type);
+        type.setText(order.type.name());
+
+        TextView size = v.findViewById(R.id.size);
+        size.setText(Util.longFormat(order.size));
+
+        TextView price = v.findViewById(R.id.price);
+        price.setText(Util.longFormat(order.price));
+
+        builder.setView(v);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
     static class OrderTag {
@@ -80,4 +116,11 @@ public class OrdersFragment extends CursorFragment {
         }
     }
 
+    private AdapterView.OnItemClickListener clickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
+            Order order = (Order) getList().getItemAtPosition(position);
+            show(order);
+        }
+    };
 }
