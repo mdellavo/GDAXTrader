@@ -2,29 +2,46 @@ package org.quuux.gdax.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.quuux.feller.Log;
 import org.quuux.gdax.API;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
+import org.quuux.gdax.Util;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.model.Order;
+import org.quuux.gdax.model.Product;
+import org.quuux.gdax.model.Tick;
 import org.quuux.gdax.view.ProductAdapater;
 
 import java.math.BigDecimal;
 
 public class PlaceMarketOrderFragment extends Fragment {
 
+    private static final String TAG = Log.buildTag(PlaceMarketOrderFragment.class);
+
     private RadioGroup mSide;
     private EditText mAmountText;
+    private TextView mTotalText;
+    private Product mProduct;
     private Spinner mSpinner;
     private ProductAdapater mSpinnerAdapter;
+    private Tick mTick;
 
     public PlaceMarketOrderFragment() {
     }
@@ -41,6 +58,13 @@ public class PlaceMarketOrderFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
         }
+        mProduct = Datastore.getInstance().getSelectedProduct();
+
+        updateTicker();
+    }
+
+    private void updateTicker() {
+        Datastore.getInstance().getTicker(mProduct);
     }
 
     @Override
@@ -51,6 +75,17 @@ public class PlaceMarketOrderFragment extends Fragment {
 
         mSpinnerAdapter = new ProductAdapater(getContext(), Datastore.getInstance().getProducts());
         mSpinner.setAdapter(mSpinnerAdapter);
+        mSpinner.setSelection(mSpinnerAdapter.getPosition(mProduct));
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+                mProduct = mSpinnerAdapter.getItem(position);
+            }
+
+            @Override
+            public void onNothingSelected(final AdapterView<?> parent) {
+            }
+        });
 
         Button button = v.findViewById(R.id.commit);
         button.setOnClickListener(new View.OnClickListener() {
@@ -61,13 +96,78 @@ public class PlaceMarketOrderFragment extends Fragment {
         });
 
         mAmountText = v.findViewById(R.id.amount);
+        mAmountText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
+                updateTotal();
+            }
+
+            @Override
+            public void afterTextChanged(final Editable s) {
+
+            }
+        });
         mSide = v.findViewById(R.id.side);
+        mTotalText = v.findViewById(R.id.total);
 
         return v;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onTicker(final Tick tick) {
+        mTick = tick;
+        updateTotal();
+    }
+
+    private void updateTotal() {
+        BigDecimal amount = getAmount();
+        Log.d(TAG, "update total: %s / %s", amount, mTick);
+
+        if (amount == null)
+            return;
+
+        if (mTick == null)
+            return;
+
+        BigDecimal value = amount.divide(mTick.price, 10, BigDecimal.ROUND_HALF_DOWN);
+        mTotalText.setText(getString(R.string.order_total, mProduct.base_currency, Util.longFormat(value)));
+    }
+
     private BigDecimal getAmount() {
-        return new BigDecimal(mAmountText.getText().toString());
+        String value = mAmountText.getText().toString();
+        if (TextUtils.isEmpty(value))
+            return null;
+
+        BigDecimal amount = null;
+
+        try {
+            amount = new BigDecimal(value);
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                mAmountText.setError(getString(R.string.error_amount_not_greater_than_zero));
+                amount = null;
+            }
+        } catch (NumberFormatException e) {
+            mAmountText.setError(getString(R.string.error_amount_not_valid));
+        }
+
+        return amount;
     }
 
     private Order.Side getSide() {
@@ -76,20 +176,11 @@ public class PlaceMarketOrderFragment extends Fragment {
 
     private void onCommit() {
         Order.Side side = getSide();
-
-        BigDecimal amount;
-        try {
-            amount = getAmount();
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                mAmountText.setError(getString(R.string.error_amount_not_greater_than_zero));
-                return;
-            }
-        } catch (NumberFormatException e) {
-            mAmountText.setError(getString(R.string.error_amount_not_valid));
+        BigDecimal amount = getAmount();
+        if (amount == null)
             return;
-        }
 
-        API.getInstance().placeOrder(Order.newMarketOrder("BTC-USD", side, amount), new API.ResponseListener<Order>() {
+        API.getInstance().placeOrder(Order.newMarketOrder(mProduct, side, amount), new API.ResponseListener<Order>() {
             @Override
             public void onSuccess(final Order result) {
 

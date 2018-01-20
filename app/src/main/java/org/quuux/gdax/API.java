@@ -21,6 +21,7 @@ import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.OrderBookEntry;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.SubscribeMessage;
+import org.quuux.gdax.model.Tick;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -62,6 +63,7 @@ public class API {
     public static final String GDAX_API_URL = "https://api.gdax.com";
     public static final String GDAX_ACCOUNTS_ENDPOINT = "/accounts";
     private static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
+    private static final String GDAX_PRODUCT_TICKER_ENDPOINT = "/products/%s/ticker";
     public static final String GDAX_ORDERS_ENDPOINT = "/orders";
     public static final String GDAX_PRODUCTS_ENDPOINT = "/products";
 
@@ -362,6 +364,14 @@ public class API {
 
     public void getProducts(ResponseListener<Product[]> listener) {
         apiCall(Method.GET, GDAX_PRODUCTS_ENDPOINT, listener, Product[].class);
+    }
+
+    public String productTickerEndpoint(Product product) {
+        return String.format(GDAX_PRODUCT_TICKER_ENDPOINT, product.id);
+    }
+
+    public void getTicker(Product product, ResponseListener<Tick> listener) {
+        apiCall(Method.GET, productTickerEndpoint(product), listener, Tick.class);
     }
 
     // Oauth

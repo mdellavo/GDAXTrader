@@ -11,4 +11,19 @@ public class Account implements Serializable {
     public BigDecimal available;
     public BigDecimal hold;
     public String profile_id;
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final Account account = (Account) o;
+
+        return id.equals(account.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

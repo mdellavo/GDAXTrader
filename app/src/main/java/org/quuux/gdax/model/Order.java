@@ -26,11 +26,11 @@ public class Order {
         return order;
     }
 
-    public static Order newMarketOrder(String product_id, Side side, BigDecimal size) {
+    public static Order newMarketOrder(Product product, Side side, BigDecimal size) {
         Order order = newOrder();
 
         order.type = Type.market;
-        order.product_id = product_id;
+        order.product_id = product.id;
         order.side = side;
         order.size = size;
 

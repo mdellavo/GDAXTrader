@@ -12,11 +12,14 @@ import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
+import org.quuux.gdax.model.Tick;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Datastore {
 
@@ -24,6 +27,9 @@ public class Datastore {
 
     private List<Product> products = new ArrayList<>();
     private List<Account> accounts = new ArrayList<>();
+    private Map<Product, Tick> tickers = new HashMap<>();
+
+    private String selectedProductId = "BTC-USD";
 
     protected Datastore() {
     }
@@ -77,6 +83,36 @@ public class Datastore {
     public void load() {
         loadAccounts();
         loadProducts();
+    }
+
+    public Product getProduct(String id) {
+        for (Product p : products)
+            if (p.id.equals(id))
+                return p;
+        return null;
+    }
+
+    public void getTicker(final Product product) {
+        API.getInstance().getTicker(product, new API.ResponseListener<Tick>() {
+            @Override
+            public void onSuccess(final Tick result) {
+                tickers.put(product, result);
+                EventBus.getDefault().post(result);
+            }
+
+            @Override
+            public void onError(final APIError error) {
+                EventBus.getDefault().post(error);
+            }
+        });
+    }
+
+    public Product getSelectedProduct() {
+        return getProduct(selectedProductId);
+    }
+
+    public void setSelectedProduct(Product product) {
+        selectedProductId = product.id;
     }
 
     public static abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
