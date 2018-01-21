@@ -34,11 +34,6 @@ public abstract class SimpleArrayAdapter<T> extends ArrayAdapter<T> {
         return view;
     }
 
-    @Override
-    public View getDropDownView(final int position, @Nullable final View convertView, @NonNull final ViewGroup parent) {
-        return getView(position, convertView, parent);
-    }
-
     public abstract void bindView(final int position, final View view, final T item);
     public abstract View newView(final int position, final ViewGroup parent);
 }

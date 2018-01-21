@@ -2,12 +2,14 @@ package org.quuux.gdax;
 
 
 import org.greenrobot.eventbus.EventBus;
+import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.PageLoadError;
 import org.quuux.gdax.events.PageLoaded;
 import org.quuux.gdax.events.ProductsLoadError;
+import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.Order;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 public class Datastore {
 
+    private static final String TAG = Log.buildTag(Datastore.class);
     private static Datastore instance;
 
     private List<Product> products = new ArrayList<>();
@@ -71,6 +74,7 @@ public class Datastore {
             public void onSuccess(final Product[] result) {
                 products.clear();
                 Collections.addAll(products, result);
+                EventBus.getDefault().post(new ProductsLoaded());
             }
 
             @Override
@@ -112,6 +116,7 @@ public class Datastore {
     }
 
     public void setSelectedProduct(Product product) {
+        Log.d(TAG, "selected product %s", product.getName());
         selectedProductId = product.id;
     }
 

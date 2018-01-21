@@ -42,6 +42,7 @@ public class PlaceMarketOrderFragment extends Fragment {
     private Spinner mSpinner;
     private ProductAdapater mSpinnerAdapter;
     private Tick mTick;
+    private TextView mPriceText;
 
     public PlaceMarketOrderFragment() {
     }
@@ -59,8 +60,6 @@ public class PlaceMarketOrderFragment extends Fragment {
         if (getArguments() != null) {
         }
         mProduct = Datastore.getInstance().getSelectedProduct();
-
-        updateTicker();
     }
 
     private void updateTicker() {
@@ -114,6 +113,7 @@ public class PlaceMarketOrderFragment extends Fragment {
         });
         mSide = v.findViewById(R.id.side);
         mTotalText = v.findViewById(R.id.total);
+        mPriceText = v.findViewById(R.id.price);
 
         return v;
     }
@@ -122,6 +122,7 @@ public class PlaceMarketOrderFragment extends Fragment {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+        updateTicker();
     }
 
     @Override
@@ -133,12 +134,12 @@ public class PlaceMarketOrderFragment extends Fragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onTicker(final Tick tick) {
         mTick = tick;
+        mPriceText.setText(getString(R.string.current_price, mProduct.base_currency, Util.currencyFormat(mTick.price), mProduct.quote_currency));
         updateTotal();
     }
 
     private void updateTotal() {
         BigDecimal amount = getAmount();
-        Log.d(TAG, "update total: %s / %s", amount, mTick);
 
         if (amount == null)
             return;

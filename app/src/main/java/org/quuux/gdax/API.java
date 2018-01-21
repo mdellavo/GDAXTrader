@@ -217,7 +217,7 @@ public class API {
         String rv = null;
         try {
             String prehash = timestamp + method.toUpperCase() + requestPath + (body != null ? body : "");
-            Log.d(TAG, "prehash: %s", prehash);
+            // Log.d(TAG, "prehash: %s", prehash);
 
             byte[] hmacKey = Base64.decode(secret, 0);
             SecretKeySpec keyspec = new SecretKeySpec(hmacKey, "HmacSHA256");

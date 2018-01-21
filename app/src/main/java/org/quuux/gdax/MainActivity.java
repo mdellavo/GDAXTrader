@@ -37,6 +37,7 @@ import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.model.Product;
 import org.quuux.gdax.view.ProductAdapater;
 import org.quuux.gdax.view.SimpleArrayAdapter;
 
@@ -62,17 +63,13 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerList = findViewById(R.id.navigation);
         mDrawerLayout.openDrawer(mDrawerList, false);
-
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,0, 0);
-
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
 
         mAccountsList = mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
         mAccountAdapter = new AccountAdapter(this);
@@ -85,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 showAccountActivity(account);
             }
         });
-
         mDrawerList.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
@@ -93,10 +89,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //mSpinner = (Spinner) getLayoutInflater().inflate(R.layout.product_spinner, mToolbar, false);
-        //mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts());
-        //mSpinner.setAdapter(mSpinnerAdapter);
-        //mToolbar.addView(mSpinner);
+        mSpinner = findViewById(R.id.products);
+        mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts());
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
+                Product product = (Product) mSpinner.getItemAtPosition(position);
+                Datastore.getInstance().setSelectedProduct(product);
+            }
+            @Override
+            public void onNothingSelected(final AdapterView<?> parent) {
+
+            }
+        });
+
+        mSpinner.setAdapter(mSpinnerAdapter);
+        mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
     }
 
     @Override
@@ -115,7 +123,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
-        mAccountAdapter.update();
+
+        Settings settings = Settings.get(this);
+        if (settings.hasApiKey()) {
+            API.getInstance().setApiKey(settings.getApiKey(), settings.getApiSecret(), settings.getApiPassphrase());
+            Datastore.getInstance().load();
+        }
+
     }
 
     @Override
@@ -237,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onProductsLoaded(ProductsLoaded event) {
         mSpinnerAdapter.notifyDataSetChanged();
+        mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
