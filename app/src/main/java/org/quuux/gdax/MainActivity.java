@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
                 Product product = (Product) mSpinner.getItemAtPosition(position);
                 Datastore.getInstance().setSelectedProduct(product);
+                Settings.get(MainActivity.this).setSelectedProduct(product);
             }
             @Override
             public void onNothingSelected(final AdapterView<?> parent) {
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mSpinner.setAdapter(mSpinnerAdapter);
-        mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
+        setProduct();
     }
 
     @Override
@@ -251,6 +252,18 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onProductsLoaded(ProductsLoaded event) {
         mSpinnerAdapter.notifyDataSetChanged();
+        setProduct();
+    }
+
+    private void setProduct() {
+
+        String selectedProductId = Settings.get(this).getSelectedProduct();
+        if (selectedProductId != null) {
+            Product product = Datastore.getInstance().getProduct(selectedProductId);
+            if (product != null)
+                Datastore.getInstance().setSelectedProduct(product);
+        }
+
         mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
     }
 

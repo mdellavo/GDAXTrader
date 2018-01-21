@@ -1,10 +1,10 @@
 package org.quuux.gdax;
 
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import org.quuux.feller.Log;
+import org.quuux.gdax.model.Product;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -119,6 +119,16 @@ public class Settings {
         editor.remove("api_secret");
         editor.remove("api_passphrase");
         editor.apply();
+    }
+
+    public void setSelectedProduct(Product product) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("selected_product", product.id);
+        editor.apply();
+    }
+
+    public String getSelectedProduct() {
+        return prefs.getString("selected_product", null);
     }
 
 }
