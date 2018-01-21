@@ -8,6 +8,7 @@ import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.PageLoadError;
 import org.quuux.gdax.events.PageLoaded;
+import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.model.Account;
@@ -118,6 +119,7 @@ public class Datastore {
     public void setSelectedProduct(Product product) {
         Log.d(TAG, "selected product %s", product.getName());
         selectedProductId = product.id;
+        EventBus.getDefault().post(new ProductSelected());
     }
 
     public static abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {

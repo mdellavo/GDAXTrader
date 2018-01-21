@@ -24,6 +24,7 @@ import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
 import org.quuux.gdax.events.APIError;
+import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.Tick;
@@ -38,9 +39,6 @@ public class PlaceMarketOrderFragment extends Fragment {
     private RadioGroup mSide;
     private EditText mAmountText;
     private TextView mTotalText;
-    private Product mProduct;
-    private Spinner mSpinner;
-    private ProductAdapater mSpinnerAdapter;
     private Tick mTick;
     private TextView mPriceText;
 
@@ -59,32 +57,15 @@ public class PlaceMarketOrderFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
         }
-        mProduct = Datastore.getInstance().getSelectedProduct();
     }
 
     private void updateTicker() {
-        Datastore.getInstance().getTicker(mProduct);
+        Datastore.getInstance().getTicker(Datastore.getInstance().getSelectedProduct());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.fragment_place_market_order, container, false);
-
-        mSpinner = v.findViewById(R.id.product);
-
-        mSpinnerAdapter = new ProductAdapater(getContext(), Datastore.getInstance().getProducts());
-        mSpinner.setAdapter(mSpinnerAdapter);
-        mSpinner.setSelection(mSpinnerAdapter.getPosition(mProduct));
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {
-                mProduct = mSpinnerAdapter.getItem(position);
-            }
-
-            @Override
-            public void onNothingSelected(final AdapterView<?> parent) {
-            }
-        });
 
         Button button = v.findViewById(R.id.commit);
         button.setOnClickListener(new View.OnClickListener() {
@@ -134,8 +115,14 @@ public class PlaceMarketOrderFragment extends Fragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onTicker(final Tick tick) {
         mTick = tick;
-        mPriceText.setText(getString(R.string.current_price, mProduct.base_currency, Util.currencyFormat(mTick.price), mProduct.quote_currency));
+        Product product = Datastore.getInstance().getSelectedProduct();
+        mPriceText.setText(getString(R.string.current_price, product.base_currency, Util.currencyFormat(mTick.price), product.quote_currency));
         updateTotal();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProductSelected(final ProductSelected event) {
+        updateTicker();
     }
 
     private void updateTotal() {
@@ -148,7 +135,8 @@ public class PlaceMarketOrderFragment extends Fragment {
             return;
 
         BigDecimal value = amount.divide(mTick.price, 10, BigDecimal.ROUND_HALF_DOWN);
-        mTotalText.setText(getString(R.string.order_total, mProduct.base_currency, Util.longFormat(value)));
+        Product product = Datastore.getInstance().getSelectedProduct();
+        mTotalText.setText(getString(R.string.order_total, product.base_currency, Util.longFormat(value)));
     }
 
     private BigDecimal getAmount() {
@@ -181,7 +169,8 @@ public class PlaceMarketOrderFragment extends Fragment {
         if (amount == null)
             return;
 
-        API.getInstance().placeOrder(Order.newMarketOrder(mProduct, side, amount), new API.ResponseListener<Order>() {
+        Product product = Datastore.getInstance().getSelectedProduct();
+        API.getInstance().placeOrder(Order.newMarketOrder(product, side, amount), new API.ResponseListener<Order>() {
             @Override
             public void onSuccess(final Order result) {
 

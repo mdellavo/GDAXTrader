@@ -9,9 +9,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
+import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.view.CursorAdapter;
 
