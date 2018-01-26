@@ -1,14 +1,22 @@
 package org.quuux.gdax.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
+import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
+import org.quuux.gdax.model.Order;
+import org.quuux.gdax.model.Product;
 
-public class PlaceStopOrderFragment extends Fragment {
+import java.math.BigDecimal;
+
+
+public class PlaceStopOrderFragment extends OrderFragment {
+
+    private EditText mPriceText;
 
     public PlaceStopOrderFragment() {
     }
@@ -21,16 +29,28 @@ public class PlaceStopOrderFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        mPriceText = v.findViewById(R.id.price);
+        mPriceText.setVisibility(View.VISIBLE);
+        v.findViewById(R.id.label_price).setVisibility(View.VISIBLE);
+        return v;
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v =  inflater.inflate(R.layout.fragment_place_stop_order, container, false);
+    public BigDecimal getPrice() {
+        return cleanDecimalInput(mPriceText, true);
+    }
 
-        return v;
+
+    public void onCommit() {
+        Order.Side side = getSide();
+        BigDecimal amount = getAmount();
+        BigDecimal price = getPrice();
+        if (amount == null || price == null)
+            return;
+
+        Product product = Datastore.getInstance().getSelectedProduct();
+        Order order = Order.newStopOrder(product, side, amount, price);
+        submitOrder(order);
     }
 }

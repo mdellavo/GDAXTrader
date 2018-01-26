@@ -218,7 +218,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void showPlaceOrder() {
         String tag = "place-order";
-        Fragment frag = PlaceOrderFragment.newInstance();
+        Fragment frag = findFragmentByTag(tag);
+        if (frag == null)
+            frag = PlaceOrderFragment.newInstance();
         swapFrag(frag, tag, false);
     }
 

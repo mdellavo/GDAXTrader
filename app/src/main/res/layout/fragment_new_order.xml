@@ -51,21 +51,42 @@
         />
 
     <TextView
-        android:id="@+id/price"
+        android:id="@+id/current_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/amount"
-        android:layout_toRightOf="@id/amount"
+        android:layout_toEndOf="@id/amount"
         android:layout_marginTop="10dp"
         />
 
+    <TextView
+        android:id="@+id/label_price"
+        android:text="@string/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/current_price"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        />
+
+    <EditText
+        android:id="@+id/price"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/amount_zero"
+        android:layout_below="@id/label_price"
+        android:inputType="numberDecimal"
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/amount"
+        android:layout_below="@id/price"
         android:layout_marginTop="10dp"
+        android:textStyle="bold"
         />
 
     <Button

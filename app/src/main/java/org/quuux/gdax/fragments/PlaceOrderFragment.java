@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +16,7 @@ import org.quuux.gdax.R;
 public class PlaceOrderFragment extends Fragment {
 
     ViewPager mPager;
-    FragmentPagerAdapter mAdapter;
+    PagerAdapter mAdapter;
 
     public PlaceOrderFragment() {
     }
@@ -48,7 +48,7 @@ public class PlaceOrderFragment extends Fragment {
         return v;
     }
 
-    class PagerAdapter extends FragmentPagerAdapter {
+    class PagerAdapter extends FragmentStatePagerAdapter {
 
         public PagerAdapter(final FragmentManager fm) {
             super(fm);

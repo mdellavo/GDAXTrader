@@ -28,12 +28,31 @@ public class Order {
 
     public static Order newMarketOrder(Product product, Side side, BigDecimal size) {
         Order order = newOrder();
-
         order.type = Type.market;
         order.product_id = product.id;
         order.side = side;
         order.size = size;
 
+        return order;
+    }
+
+    public static Order newLimitOrder(Product product, Side side, BigDecimal size, BigDecimal price) {
+        Order order = newOrder();
+        order.type = Type.limit;
+        order.product_id = product.id;
+        order.side = side;
+        order.size = size;
+        order.price = price;
+        return order;
+    }
+
+    public static Order newStopOrder(final Product product, final Side side, final BigDecimal size, final BigDecimal price) {
+        Order order = newOrder();
+        order.type = Type.stop;
+        order.product_id = product.id;
+        order.side = side;
+        order.size = size;
+        order.price = price;
         return order;
     }
 }
