@@ -7,13 +7,16 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.quuux.gdax.API;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
+import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.view.CursorAdapter;
@@ -81,10 +84,35 @@ public class OrdersFragment extends CursorFragment {
         price.setText(Util.longFormat(order.price));
 
         builder.setView(v);
+        final AlertDialog dialog = builder.create();
 
-        AlertDialog dialog = builder.create();
+        if (order.isCancelable()) {
+            Button cancel = v.findViewById(R.id.cancel);
+            cancel.setVisibility(View.VISIBLE);
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    cancelOrder(order);
+                    dialog.dismiss();
+                }
+            });
+        }
+
         dialog.show();
+    }
 
+    private void cancelOrder(final Order order) {
+        API.getInstance().cancelOrder(order, new API.ResponseListener<Order>() {
+            @Override
+            public void onSuccess(final Order result) {
+
+            }
+
+            @Override
+            public void onError(final APIError error) {
+
+            }
+        });
     }
 
     static class OrderTag {

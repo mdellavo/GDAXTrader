@@ -41,7 +41,6 @@ public class PlaceStopOrderFragment extends OrderFragment {
         return cleanDecimalInput(mPriceText, true);
     }
 
-
     public void onCommit() {
         Order.Side side = getSide();
         BigDecimal amount = getAmount();

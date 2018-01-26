@@ -26,6 +26,10 @@ public class Order {
         return order;
     }
 
+    public boolean isCancelable() {
+        return status == Status.open || status == Status.pending || status == Status.active;
+    }
+
     public static Order newMarketOrder(Product product, Side side, BigDecimal size) {
         Order order = newOrder();
         order.type = Type.market;

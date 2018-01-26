@@ -1,5 +1,6 @@
 package org.quuux.gdax.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -30,11 +31,28 @@ import java.math.BigDecimal;
 
 abstract public class OrderFragment extends Fragment {
 
+    public interface Listener {
+        void showOrders();
+    }
+
     protected RadioGroup mSide;
     protected EditText mAmountText;
     protected TextView mTotalText;
     protected Tick mTick;
     protected TextView mCurrentPrice;
+    protected Listener mListener;
+
+    @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+        mListener = (Listener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -151,7 +169,6 @@ abstract public class OrderFragment extends Fragment {
         }
 
         return amount;
-
     }
 
     public BigDecimal getAmount() {
@@ -166,7 +183,7 @@ abstract public class OrderFragment extends Fragment {
         API.getInstance().placeOrder(order, new API.ResponseListener<Order>() {
             @Override
             public void onSuccess(final Order result) {
-
+                mListener.showOrders();
             }
 
             @Override

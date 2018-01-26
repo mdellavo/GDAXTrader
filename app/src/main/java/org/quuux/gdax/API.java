@@ -65,6 +65,7 @@ public class API {
     private static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
     private static final String GDAX_PRODUCT_TICKER_ENDPOINT = "/products/%s/ticker";
     public static final String GDAX_ORDERS_ENDPOINT = "/orders";
+    public static final String GDAX_ORDER_ENDPOINT = "/orders/%s";
     public static final String GDAX_PRODUCTS_ENDPOINT = "/products";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
@@ -372,6 +373,14 @@ public class API {
 
     public void getTicker(Product product, ResponseListener<Tick> listener) {
         apiCall(Method.GET, productTickerEndpoint(product), listener, Tick.class);
+    }
+
+    private String orderEndpoint(final Order order) {
+        return String.format(GDAX_ORDER_ENDPOINT, order.id);
+    }
+
+    public void cancelOrder(final Order order, final ResponseListener<Order> listener) {
+        apiCall(Method.DELETE, orderEndpoint(order), listener, Order.class);
     }
 
     // Oauth

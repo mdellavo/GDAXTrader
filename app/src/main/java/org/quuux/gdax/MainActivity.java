@@ -34,6 +34,7 @@ import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.fragments.AccountActivityFragment;
+import org.quuux.gdax.fragments.OrderFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
@@ -42,7 +43,7 @@ import org.quuux.gdax.view.ProductAdapater;
 import org.quuux.gdax.view.SimpleArrayAdapter;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OrderFragment.Listener {
 
     private static final String TAG = Log.buildTag(MainActivity.class);
 
@@ -130,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
             API.getInstance().setApiKey(settings.getApiKey(), settings.getApiSecret(), settings.getApiPassphrase());
             Datastore.getInstance().load();
         }
-
     }
 
     @Override
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         return rv;
     }
 
-    private void showOrders() {
+    public void showOrders() {
         String tag = "orders";
         Fragment fragment = findFragmentByTag(tag);
         if (fragment == null)
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         swapFrag(fragment,  tag, false);
     }
 
-    private void showAccountActivity(Account account) {
+    public void showAccountActivity(Account account) {
         String tag = "account-activity-" + account.id;
         Fragment frag = findFragmentByTag(tag);
         if (frag == null)
@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         swapFrag(frag, tag, false);
     }
 
-    private void showPlaceOrder() {
+    public void showPlaceOrder() {
         String tag = "place-order";
         Fragment frag = findFragmentByTag(tag);
         if (frag == null)

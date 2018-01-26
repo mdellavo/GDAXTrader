@@ -44,5 +44,6 @@
     <string name="product">Product</string>
     <string name="order_total">Total (%s) ≈ %s</string>
     <string name="current_price">1 %S = %s %s</string>
+    <string name="cancel_order">Cancel Order</string>
 
 </resources>
