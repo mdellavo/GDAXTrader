@@ -34,7 +34,7 @@ import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.fragments.AccountActivityFragment;
-import org.quuux.gdax.fragments.OrderFragment;
+import org.quuux.gdax.fragments.BasePlaceOrderFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
@@ -43,7 +43,7 @@ import org.quuux.gdax.view.ProductAdapater;
 import org.quuux.gdax.view.SimpleArrayAdapter;
 
 
-public class MainActivity extends AppCompatActivity implements OrderFragment.Listener {
+public class MainActivity extends AppCompatActivity implements BasePlaceOrderFragment.Listener {
 
     private static final String TAG = Log.buildTag(MainActivity.class);
 

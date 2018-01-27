@@ -29,7 +29,7 @@ import org.quuux.gdax.model.Tick;
 
 import java.math.BigDecimal;
 
-abstract public class OrderFragment extends Fragment {
+abstract public class BasePlaceOrderFragment extends Fragment {
 
     public interface Listener {
         void showOrders();

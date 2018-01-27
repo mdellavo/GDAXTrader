@@ -8,7 +8,7 @@ import org.quuux.gdax.model.Product;
 
 import java.math.BigDecimal;
 
-public class PlaceMarketOrderFragment extends OrderFragment {
+public class PlaceMarketOrderFragment extends BasePlaceOrderFragment {
 
     public PlaceMarketOrderFragment() {
     }

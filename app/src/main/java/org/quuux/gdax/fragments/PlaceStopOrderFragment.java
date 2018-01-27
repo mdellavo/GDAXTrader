@@ -14,7 +14,7 @@ import org.quuux.gdax.model.Product;
 import java.math.BigDecimal;
 
 
-public class PlaceStopOrderFragment extends OrderFragment {
+public class PlaceStopOrderFragment extends BasePlaceOrderFragment {
 
     private EditText mPriceText;
 

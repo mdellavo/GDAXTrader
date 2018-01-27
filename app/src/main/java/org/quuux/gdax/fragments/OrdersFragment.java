@@ -4,12 +4,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.gdax.API;
@@ -36,7 +41,6 @@ public class OrdersFragment extends CursorFragment {
         return fragment;
     }
 
-
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         if (getArguments() != null) {
@@ -54,9 +58,94 @@ public class OrdersFragment extends CursorFragment {
         setItemClickListener(clickListener);
 
         super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
     }
 
-    private void show(final Order order) {
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProductSelected(final ProductSelected event) {
+        mCursor.reset();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_orders, menu);
+
+        MenuItem checked;
+        switch (mCursor.getStatusFilter()) {
+            case open:
+                checked = menu.findItem(R.id.open);
+                break;
+
+            case closed:
+                checked = menu.findItem(R.id.closed);
+                break;
+
+            default:
+                checked = menu.findItem(R.id.all);
+                break;
+        }
+
+        checked.setChecked(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+
+        boolean rv;
+        switch (item.getItemId()) {
+
+            case R.id.all:
+            case R.id.open:
+            case R.id.closed:
+                if (!item.isChecked()) {
+                    updateStatusFilter(item.getItemId());
+                    item.setChecked(true);
+                }
+                rv = true;
+                break;
+
+            default:
+                rv = super.onOptionsItemSelected(item);
+        }
+
+        return rv;
+    }
+
+    private void updateStatusFilter(final int id) {
+
+        Datastore.OrdersCursor.StatusFilter filter;
+        switch (id) {
+            case R.id.open:
+                filter = Datastore.OrdersCursor.StatusFilter.open;
+                break;
+            case R.id.closed:
+                filter = Datastore.OrdersCursor.StatusFilter.closed;
+                break;
+
+            default:
+                filter = Datastore.OrdersCursor.StatusFilter.all;
+                break;
+        }
+
+        mCursor.setStatusFilter(filter);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void showOrder(final Order order) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(order.side.name());
 
@@ -151,7 +240,7 @@ public class OrdersFragment extends CursorFragment {
         @Override
         public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
             Order order = (Order) getList().getItemAtPosition(position);
-            show(order);
+            showOrder(order);
         }
     };
 }

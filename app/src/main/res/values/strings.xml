@@ -45,5 +45,9 @@
     <string name="order_total">Total (%s) ≈ %s</string>
     <string name="current_price">1 %S = %s %s</string>
     <string name="cancel_order">Cancel Order</string>
+    <string name="filter">Filter</string>
+    <string name="all">All</string>
+    <string name="open">Open</string>
+    <string name="closed">Closed</string>
 
 </resources>

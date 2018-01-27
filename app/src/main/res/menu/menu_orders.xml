@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/filter"
+        android:title="@string/filter"
+        android:icon="@drawable/ic_action_filter"
+        app:showAsAction="always"
+        >
+        <menu xmlns:android="http://schemas.android.com/apk/res/android">
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/all"
+                    android:title="@string/all"
+                    />
+
+                <item
+                    android:id="@+id/open"
+                    android:title="@string/open"
+                    />
+
+                <item
+                    android:id="@+id/closed"
+                    android:title="@string/closed"
+                    />
+            </group>
+        </menu>
+    </item>
+</menu>
