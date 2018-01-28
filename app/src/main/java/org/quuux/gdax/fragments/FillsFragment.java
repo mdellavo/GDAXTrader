@@ -4,6 +4,7 @@ package org.quuux.gdax.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -61,7 +62,33 @@ public class FillsFragment extends CursorFragment {
     }
 
     private void showFill(final Fill fill) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(fill.side.name());
 
+        final View v = getLayoutInflater().inflate(R.layout.fill_details, null);
+
+        TextView id = v.findViewById(R.id.id);
+        id.setText(fill.order_id);
+
+        TextView product = v.findViewById(R.id.product);
+        product.setText(fill.product_id);
+
+        TextView size = v.findViewById(R.id.size);
+        size.setText(Util.longFormat(fill.size));
+
+        TextView price = v.findViewById(R.id.price);
+        price.setText(Util.longFormat(fill.price));
+
+        TextView fee = v.findViewById(R.id.fee);
+        fee.setText(Util.longFormat(fill.fee));
+
+        TextView created_at = v.findViewById(R.id.created_at);
+        created_at.setText(fill.created_at.toString());
+
+        builder.setView(v);
+        final AlertDialog dialog = builder.create();
+
+        dialog.show();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
