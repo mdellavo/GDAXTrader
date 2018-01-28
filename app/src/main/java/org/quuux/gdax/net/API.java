@@ -68,6 +68,8 @@ public class API {
     public static final String GDAX_ORDER_ENDPOINT = "/orders/%s";
     public static final String GDAX_PRODUCTS_ENDPOINT = "/products";
     public static final String GDAX_FILLS_ENDPOINT = "/fills";
+    public static final String GDAX_PAYMENT_METHODS_ENDPOINT = "/payment-methods";
+    public static final String GDAX_COINBASE_ACCOUNTS_ENDPOINT = "/coinbase-accounts";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -353,10 +355,6 @@ public class API {
 
     public String accountLedgerEndpoint(Account account) {
         return String.format(GDAX_ACCOUNT_LEDGER_ENDPOINT, account.id);
-    }
-
-    public void getAccountHistory(Account account, PaginatedResponseListener<AccountActivity[]> listener) {
-        loadPage(accountLedgerEndpoint(account), listener, AccountActivity[].class);
     }
 
     public void placeOrder(final Order order, ResponseListener<Order> listener) {

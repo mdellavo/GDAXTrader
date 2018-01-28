@@ -4,18 +4,15 @@ package org.quuux.gdax;
 import org.greenrobot.eventbus.EventBus;
 import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
-import org.quuux.gdax.events.AccountsLoadError;
-import org.quuux.gdax.events.AccountsUpdated;
 import org.quuux.gdax.events.ProductSelected;
-import org.quuux.gdax.events.ProductsLoadError;
-import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.Tick;
 import org.quuux.gdax.net.API;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import org.quuux.gdax.net.AccountsCursor;
+import org.quuux.gdax.net.Cursor;
+import org.quuux.gdax.net.ProductsCursor;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +22,9 @@ public class Datastore {
     private static final String TAG = Log.buildTag(Datastore.class);
     private static Datastore instance;
 
-    private List<Product> products = new ArrayList<>();
-    private List<Account> accounts = new ArrayList<>();
     private Map<Product, Tick> tickers = new HashMap<>();
+    private ProductsCursor mProducts = new ProductsCursor();
+    private AccountsCursor mAccounts = new AccountsCursor();
 
     private String selectedProductId = "BTC-USD";
 
@@ -41,61 +38,25 @@ public class Datastore {
     }
 
     public List<Account> getAccounts() {
-        return accounts;
+        return mAccounts.getItems();
     }
 
-    public void loadAccounts() {
-        if (accounts.size() > 0) {
-            return;
-        }
-
-        API.getInstance().getAccounts(new API.ResponseListener<Account[]>() {
-            @Override
-            public void onSuccess(final Account[] result) {
-                accounts.clear();
-                accounts.addAll(Arrays.asList(result));
-
-                EventBus.getDefault().post(new AccountsUpdated());
-            }
-
-            @Override
-            public void onError(final APIError error) {
-                EventBus.getDefault().post(new AccountsLoadError(error));
-            }
-        });
-    }
 
     public List<Product> getProducts() {
-        return products;
+        return mProducts.getItems();
     }
 
-    public void loadProducts() {
-        if (products.size() > 0) {
-            return;
-        }
-
-        API.getInstance().getProducts(new API.ResponseListener<Product[]>() {
-            @Override
-            public void onSuccess(final Product[] result) {
-                products.clear();
-                Collections.addAll(products, result);
-                EventBus.getDefault().post(new ProductsLoaded());
-            }
-
-            @Override
-            public void onError(final APIError error) {
-                EventBus.getDefault().post(new ProductsLoadError(error));
-            }
-        });
-    }
 
     public void load() {
-        loadAccounts();
-        loadProducts();
+        Cursor[] cursors = new Cursor[] {mAccounts, mProducts};
+        for (int i=0; i<cursors.length; i++) {
+            if (cursors[i].getState() == Cursor.State.init)
+                cursors[i].load();
+        }
     }
 
     public Product getProduct(String id) {
-        for (Product p : products)
+        for (Product p : getProducts())
             if (p.id.equals(id))
                 return p;
         return null;

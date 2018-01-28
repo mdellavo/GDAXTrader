@@ -29,10 +29,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
-import org.quuux.gdax.events.AccountsLoadError;
-import org.quuux.gdax.events.AccountsUpdated;
-import org.quuux.gdax.events.ProductsLoadError;
-import org.quuux.gdax.events.ProductsLoaded;
+import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
 import org.quuux.gdax.fragments.DepositFragment;
@@ -43,8 +40,12 @@ import org.quuux.gdax.fragments.WithdrawFragment;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.net.API;
+import org.quuux.gdax.net.AccountsCursor;
+import org.quuux.gdax.net.ProductsCursor;
 import org.quuux.gdax.view.ProductAdapater;
 import org.quuux.gdax.view.SimpleArrayAdapter;
+
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements BasePlaceOrderFragment.Listener {
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
         mAccountsList = mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
-        mAccountAdapter = new AccountAdapter(this);
+        mAccountAdapter = new AccountAdapter(this, Datastore.getInstance().getAccounts());
         mAccountsList.setAdapter(mAccountAdapter);
         mAccountsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -287,19 +288,13 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onAccountsUpdated(AccountsUpdated event) {
-        mAccountAdapter.update();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onAccountsLoadError(AccountsLoadError event) {
-        mAccountAdapter.clear();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onProductsLoaded(ProductsLoaded event) {
-        mSpinnerAdapter.notifyDataSetChanged();
-        setProduct();
+    public void onCursorUpdated(CursorUpdated event) {
+        if (event.cursor instanceof AccountsCursor) {
+            mAccountAdapter.notifyDataSetChanged();
+        } else if (event.cursor instanceof ProductsCursor) {
+            mSpinnerAdapter.notifyDataSetChanged();
+            setProduct();
+        }
     }
 
     private void setProduct() {
@@ -314,10 +309,6 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onProductsLoadError(ProductsLoadError event) {
-
-    }
 
     private void launchSignIn() {
         startActivity(new Intent(this, SignInActivity.class));
@@ -333,14 +324,8 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     class AccountAdapter extends SimpleArrayAdapter<Account> {
 
-
-        public AccountAdapter(final Context context) {
-            super(context);
-        }
-
-        public void update() {
-            clear();
-            addAll(Datastore.getInstance().getAccounts());
+        public AccountAdapter(final Context context, List<Account> accounts) {
+            super(context, accounts);
         }
 
         @Override
