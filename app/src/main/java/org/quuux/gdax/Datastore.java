@@ -14,6 +14,8 @@ import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.Tick;
+import org.quuux.gdax.net.API;
+import org.quuux.gdax.net.Cursor;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -122,88 +124,4 @@ public class Datastore {
         EventBus.getDefault().post(new ProductSelected());
     }
 
-    public static class AccountActivityCursor extends Cursor<AccountActivity> {
-
-        private final Account account;
-
-        public AccountActivityCursor(Account account) {
-            this.account = account;
-        }
-
-        @Override
-        public Class<AccountActivity[]> getPageClass() {
-            return AccountActivity[].class;
-        }
-
-        @Override
-        String getEndpoint() {
-            return API.getInstance().accountLedgerEndpoint(account);
-        }
-    }
-
-    public static class OrdersCursor extends Cursor<Order> {
-        public enum StatusFilter {all, open, closed}
-
-        StatusFilter status = StatusFilter.all;
-
-        public StatusFilter getStatusFilter() {
-            return status;
-        }
-
-        public void setStatusFilter(StatusFilter status) {
-            if (this.status != status) {
-                this.status = status;
-                reset();
-            }
-        }
-
-        @Override
-        public Class<Order[]> getPageClass() {
-            return Order[].class;
-        }
-
-        public String[] expandStatuses() {
-
-            String rv[];
-            switch (status) {
-                case open:
-                    rv = new String[] {
-                            Order.Status.pending.name(),
-                            Order.Status.open.name(),
-                            Order.Status.active.name(),
-                    };
-                    break;
-
-                case closed:
-                    rv = new String[] {
-                            Order.Status.done.name(),
-                    };
-                    break;
-
-                default:
-                    rv = new String[] {"all"};
-                    break;
-
-            }
-            return rv;
-        }
-
-        @Override
-        String getEndpoint() {
-            StringBuilder sb = new StringBuilder(API.GDAX_ORDERS_ENDPOINT);
-
-            try {
-                String productId = Datastore.getInstance().getSelectedProduct().id;
-                sb.append(String.format("?product_id=%s", URLEncoder.encode(productId, "UTF-8")));
-
-                for (String status : expandStatuses())
-                    sb.append(String.format("&status=%s", URLEncoder.encode(status, "UTF-8")));
-
-            } catch (UnsupportedEncodingException e) {
-                Log.e(TAG, "error building orders endpoint: %s", e);
-            }
-            return sb.toString();
-        }
-
-    }
 }

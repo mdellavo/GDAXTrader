@@ -10,6 +10,7 @@ import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
+import org.quuux.gdax.model.Side;
 
 import java.math.BigDecimal;
 
@@ -42,7 +43,7 @@ public class PlaceLimitOrderFragment extends BasePlaceOrderFragment {
     }
 
     public void onCommit() {
-        Order.Side side = getSide();
+        Side side = getSide();
         BigDecimal amount = getAmount();
         BigDecimal price = getPrice();
         if (amount == null || price == null)

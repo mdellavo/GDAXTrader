@@ -35,10 +35,12 @@ import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
+import org.quuux.gdax.fragments.FillsFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Product;
+import org.quuux.gdax.net.API;
 import org.quuux.gdax.view.ProductAdapater;
 import org.quuux.gdax.view.SimpleArrayAdapter;
 
@@ -190,14 +192,28 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
             case R.id.orders:
                 showOrders();
+                rv = true;
                 break;
 
             case R.id.place_order:
                 showPlaceOrder();
                 rv = true;
                 break;
+
+            case R.id.fills:
+                showFills();
+                rv = true;
+                break;
         }
         return rv;
+    }
+
+    private void showFills() {
+        String tag = "fills";
+        Fragment fragment = findFragmentByTag(tag);
+        if (fragment == null)
+            fragment = FillsFragment.newInstance();
+        swapFrag(fragment,  tag, false);
     }
 
     public void showOrders() {

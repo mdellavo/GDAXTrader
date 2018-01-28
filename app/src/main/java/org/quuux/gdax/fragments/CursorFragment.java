@@ -13,7 +13,7 @@ import android.widget.ListView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.quuux.gdax.Cursor;
+import org.quuux.gdax.net.Cursor;
 import org.quuux.gdax.R;
 import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.view.CursorAdapter;

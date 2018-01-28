@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
-import org.quuux.gdax.Cursor;
-import org.quuux.gdax.Datastore;
+import org.quuux.gdax.net.AccountActivityCursor;
+import org.quuux.gdax.net.Cursor;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
 import org.quuux.gdax.model.Account;
@@ -22,7 +22,7 @@ public class AccountActivityFragment extends CursorFragment {
     private static final String ARG_ACCOUNT = "account";
 
     private Account mAccount;
-    private Datastore.AccountActivityCursor mCursor;
+    private AccountActivityCursor mCursor;
     private AccountActivityAdapter mAdapter;
 
     public AccountActivityFragment() {}
@@ -44,7 +44,7 @@ public class AccountActivityFragment extends CursorFragment {
         setLayoutResource(R.layout.fragment_account_activity);
         setHeaderResource(R.layout.account_activity_header);
 
-        mCursor = new Datastore.AccountActivityCursor(mAccount);
+        mCursor = new AccountActivityCursor(mAccount);
         setCursor(mCursor);
 
         mAdapter = new AccountActivityAdapter(getContext(), mCursor);

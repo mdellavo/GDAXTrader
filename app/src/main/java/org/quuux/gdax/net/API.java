@@ -1,4 +1,4 @@
-package org.quuux.gdax;
+package org.quuux.gdax.net;
 
 import android.net.Uri;
 import android.text.TextUtils;
@@ -67,6 +67,7 @@ public class API {
     public static final String GDAX_ORDERS_ENDPOINT = "/orders";
     public static final String GDAX_ORDER_ENDPOINT = "/orders/%s";
     public static final String GDAX_PRODUCTS_ENDPOINT = "/products";
+    public static final String GDAX_FILLS_ENDPOINT = "/fills";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -82,38 +83,38 @@ public class API {
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
-    enum Method {GET, PUT, POST, DELETE}
+    public enum Method {GET, PUT, POST, DELETE}
 
-    static class ErrorMessage {
-        String message;
+    public static class ErrorMessage {
+        public String message;
     }
 
-    static class OrderBookSnapshot {
-        long sequence;
-        List<OrderBookEntry> bids;
-        List<OrderBookEntry> asks;
+    public static class OrderBookSnapshot {
+        public long sequence;
+        public List<OrderBookEntry> bids;
+        public List<OrderBookEntry> asks;
     }
 
-    static class TokenResponse {
-        String access_token;
-        String token_type;
-        int expires_in;
-        String refresh_token;
-        String scope;
-        Date created = new Date();
+    public static class TokenResponse {
+        public String access_token;
+        public String token_type;
+        public int expires_in;
+        public String refresh_token;
+        public String scope;
+        public Date created = new Date();
         public Date getExpires() {
             return new Date(created.getTime() + (expires_in * 1000));
         }
     }
 
-    interface FeedListener {
+    public interface FeedListener {
         void onMessage(FeedMessage message);
         void onSnapshot(OrderBookSnapshot snapshot);
         void onError(final Throwable t, final Response response);
         void onClosed(final int code, final String reason);
     }
 
-    interface TokenListener {
+    public interface TokenListener {
         void onError(Throwable t);
         void onToken(TokenResponse token);
     }

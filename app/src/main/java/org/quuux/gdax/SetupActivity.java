@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import org.quuux.feller.Log;
+import org.quuux.gdax.net.API;
 
 public class SetupActivity extends AppCompatActivity {
 

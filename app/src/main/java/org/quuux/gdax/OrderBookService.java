@@ -10,6 +10,7 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.OrderBookEntry;
 import org.quuux.gdax.model.OrderBook;
+import org.quuux.gdax.net.API;
 
 import java.math.BigDecimal;
 

@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import org.quuux.feller.Log;
+import org.quuux.gdax.net.API;
 
 import java.util.Date;
 

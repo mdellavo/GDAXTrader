@@ -17,7 +17,8 @@ import android.widget.TextView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.quuux.gdax.API;
+import org.quuux.gdax.model.Side;
+import org.quuux.gdax.net.API;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
@@ -175,8 +176,8 @@ abstract public class BasePlaceOrderFragment extends Fragment {
         return cleanDecimalInput(mAmountText, true);
     }
 
-    public Order.Side getSide() {
-        return mSide.getCheckedRadioButtonId() == R.id.buy ? Order.Side.buy : Order.Side.sell;
+    public Side getSide() {
+        return mSide.getCheckedRadioButtonId() == R.id.buy ? Side.buy : Side.sell;
     }
 
     public void submitOrder(Order order) {

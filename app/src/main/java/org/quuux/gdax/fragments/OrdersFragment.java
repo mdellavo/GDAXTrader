@@ -15,20 +15,20 @@ import android.widget.TextView;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.quuux.gdax.API;
-import org.quuux.gdax.Cursor;
-import org.quuux.gdax.Datastore;
+import org.quuux.gdax.net.API;
+import org.quuux.gdax.net.Cursor;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Order;
+import org.quuux.gdax.net.OrdersCursor;
 import org.quuux.gdax.view.CursorAdapter;
 
 
 public class OrdersFragment extends CursorFragment {
 
-    private Datastore.OrdersCursor mCursor;
+    private OrdersCursor mCursor;
     private OrdersAdapter mAdapter;
 
     public OrdersFragment() {}
@@ -48,7 +48,7 @@ public class OrdersFragment extends CursorFragment {
         setLayoutResource(R.layout.fragment_orders);
         setHeaderResource(R.layout.orders_header);
 
-        mCursor = new Datastore.OrdersCursor();
+        mCursor = new OrdersCursor();
         setCursor(mCursor);
 
         mAdapter = new OrdersAdapter(getContext(), mCursor);
@@ -114,17 +114,17 @@ public class OrdersFragment extends CursorFragment {
 
     private void updateStatusFilter(final int id) {
 
-        Datastore.OrdersCursor.StatusFilter filter;
+        OrdersCursor.StatusFilter filter;
         switch (id) {
             case R.id.open:
-                filter = Datastore.OrdersCursor.StatusFilter.open;
+                filter = OrdersCursor.StatusFilter.open;
                 break;
             case R.id.closed:
-                filter = Datastore.OrdersCursor.StatusFilter.closed;
+                filter = OrdersCursor.StatusFilter.closed;
                 break;
 
             default:
-                filter = Datastore.OrdersCursor.StatusFilter.all;
+                filter = OrdersCursor.StatusFilter.all;
                 break;
         }
 

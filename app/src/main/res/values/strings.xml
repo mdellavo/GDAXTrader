@@ -49,5 +49,7 @@
     <string name="all">All</string>
     <string name="open">Open</string>
     <string name="closed">Closed</string>
+    <string name="no_fills">No fills</string>
+    <string name="fee">Fee</string>
 
 </resources>

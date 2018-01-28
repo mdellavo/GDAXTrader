@@ -1,8 +1,9 @@
-package org.quuux.gdax;
+package org.quuux.gdax.net;
 
 import org.greenrobot.eventbus.EventBus;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.CursorUpdated;
+import org.quuux.gdax.net.API;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
         load();
     }
 
-    abstract String getEndpoint();
+    public abstract String getEndpoint();
 
     @Override
     public void onSuccess(final T[] result, final String before, final String after) {

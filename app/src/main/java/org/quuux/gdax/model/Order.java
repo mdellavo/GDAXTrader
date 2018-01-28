@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class Order {
     public enum Type {market, limit, stop}
-    public enum Side {buy, sell}
+
     public enum Status {pending, open, active, done, settled, canceled}
 
     public String client_oid;

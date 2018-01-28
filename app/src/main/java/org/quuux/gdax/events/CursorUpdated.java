@@ -1,7 +1,7 @@
 package org.quuux.gdax.events;
 
 
-import org.quuux.gdax.Cursor;
+import org.quuux.gdax.net.Cursor;
 
 public class CursorUpdated {
 

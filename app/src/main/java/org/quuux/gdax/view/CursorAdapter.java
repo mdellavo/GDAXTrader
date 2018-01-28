@@ -5,7 +5,7 @@ import android.content.Context;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.quuux.gdax.Cursor;
+import org.quuux.gdax.net.Cursor;
 import org.quuux.gdax.events.CursorUpdated;
 
 public abstract class CursorAdapter<T> extends SimpleArrayAdapter<T> {
