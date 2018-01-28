@@ -10,15 +10,9 @@ import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.model.Account;
-import org.quuux.gdax.model.AccountActivity;
-import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.Tick;
 import org.quuux.gdax.net.API;
-import org.quuux.gdax.net.Cursor;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +45,10 @@ public class Datastore {
     }
 
     public void loadAccounts() {
+        if (accounts.size() > 0) {
+            return;
+        }
+
         API.getInstance().getAccounts(new API.ResponseListener<Account[]>() {
             @Override
             public void onSuccess(final Account[] result) {
@@ -72,6 +70,10 @@ public class Datastore {
     }
 
     public void loadProducts() {
+        if (products.size() > 0) {
+            return;
+        }
+
         API.getInstance().getProducts(new API.ResponseListener<Product[]>() {
             @Override
             public void onSuccess(final Product[] result) {

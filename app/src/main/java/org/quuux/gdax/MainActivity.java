@@ -35,9 +35,11 @@ import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
 import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
+import org.quuux.gdax.fragments.DepositFragment;
 import org.quuux.gdax.fragments.FillsFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
+import org.quuux.gdax.fragments.WithdrawFragment;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.net.API;
@@ -204,6 +206,16 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
                 showFills();
                 rv = true;
                 break;
+
+            case R.id.deposit:
+                showDeposit();
+                rv = true;
+                break;
+
+            case R.id.withdraw:
+                showWithdraw();
+                rv = true;
+                break;
         }
         return rv;
     }
@@ -255,6 +267,23 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         builder.setMessage(message);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+
+    private void showWithdraw() {
+        String tag = "withdraw";
+        Fragment frag = findFragmentByTag(tag);
+        if (frag == null)
+            frag = WithdrawFragment.newInstance();
+        swapFrag(frag, tag, false);
+    }
+
+    private void showDeposit() {
+        String tag = "deposit";
+        Fragment frag = findFragmentByTag(tag);
+        if (frag == null)
+            frag = DepositFragment.newInstance();
+        swapFrag(frag, tag, false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

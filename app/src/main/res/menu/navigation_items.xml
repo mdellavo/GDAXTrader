@@ -24,9 +24,8 @@
             android:title="@string/setup" />
 
         <item
-            android:id="@+id/support"
-            android:title="@string/support" />
-
+            android:id="@+id/help"
+            android:title="@string/help" />
 
     </group>
 </menu>

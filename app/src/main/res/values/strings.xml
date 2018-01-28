@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GDAX</string>
+    <string name="app_name">GDAX Trader</string>
     <string name="spread">Spread</string>
     <string name="signin">Sign in</string>
     <string name="orderbook">Order Book</string>
@@ -51,6 +51,8 @@
     <string name="closed">Closed</string>
     <string name="no_fills">No fills</string>
     <string name="fee">Fee</string>
-    <string name="support">Support</string>
+    <string name="help">Help</string>
+    <string name="bank_account">Bank Account</string>
+    <string name="coinbase">Coinbase</string>
 
 </resources>
