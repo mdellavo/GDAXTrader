@@ -27,6 +27,7 @@ public abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
         state = State.loading;
         API api = API.getInstance();
         api.loadPage(getEndpoint(), this, getPageClass());
+        EventBus.getDefault().post(new CursorUpdated(this));
     }
 
     public void reset() {
@@ -39,28 +40,20 @@ public abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
 
     @Override
     public void onSuccess(final T[] result, final String before, final String after) {
+        state = State.loaded;
         Collections.addAll(items, result);
         this.before = before;
         this.after = after;
         EventBus.getDefault().post(new CursorUpdated(this));
-        state = State.loaded;
     }
 
     @Override
     public void onError(final APIError error) {
-        EventBus.getDefault().post(new CursorUpdated(this, error));
         state = State.error;
+        EventBus.getDefault().post(new CursorUpdated(this, error));
     }
 
     public State getState() {
         return state;
-    }
-
-    public boolean isLoaded() {
-        return state == State.loaded;
-    }
-
-    public boolean isLoading() {
-        return state == State.loading;
     }
 }

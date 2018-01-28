@@ -3,6 +3,7 @@ package org.quuux.gdax.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,8 @@ public abstract class CursorFragment extends Fragment {
     private int mLayoutResource;
     private int mHeaderResource = 0;
     private AdapterView.OnItemClickListener mItemClickListener;
-    private View mEmptyView, mLoadingProgress;
+    private View mEmptyView;
+    private SwipeRefreshLayout mSwipeRefresh;
 
     public ListView getList() {
         return mList;
@@ -79,11 +81,17 @@ public abstract class CursorFragment extends Fragment {
 
         mEmptyView = v.findViewById(R.id.empty);
 
-        mLoadingProgress = LayoutInflater.from(getContext()).inflate(R.layout.loading, null);
-        mList.addFooterView(mLoadingProgress);
-
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(mItemClickListener);
+
+        mSwipeRefresh = v.findViewById(R.id.swiperefresh);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mCursor.reset();
+            }
+        });
+        mSwipeRefresh.setRefreshing(true);
 
         return v;
     }
@@ -93,21 +101,24 @@ public abstract class CursorFragment extends Fragment {
         if (event.cursor != mCursor)
             return;
 
-        mList.setEmptyView(mEmptyView);
-
         switch (mCursor.getState()) {
             case init:
                 break;
 
             case loading:
-                mLoadingProgress.setVisibility(View.VISIBLE);
+                mSwipeRefresh.setRefreshing(true);
+                mEmptyView.setVisibility(View.GONE);
                 break;
 
             case loaded:
-                mLoadingProgress.setVisibility(View.GONE);
+                mSwipeRefresh.setRefreshing(false);
+                if (mCursor.getItems().size() == 0) {
+                    mEmptyView.setVisibility(View.VISIBLE);
+                }
                 break;
 
             case error:
+                mSwipeRefresh.setRefreshing(false);
                 break;
         }
     }
