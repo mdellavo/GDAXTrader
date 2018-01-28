@@ -11,13 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.gdax.API;
+import org.quuux.gdax.Cursor;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
@@ -60,18 +59,6 @@ public class OrdersFragment extends CursorFragment {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -210,7 +197,7 @@ public class OrdersFragment extends CursorFragment {
 
     class OrdersAdapter extends CursorAdapter<Order> {
 
-        public OrdersAdapter(final Context context, final Datastore.Cursor<Order> cursor) {
+        public OrdersAdapter(final Context context, final Cursor<Order> cursor) {
             super(context, cursor);
         }
 

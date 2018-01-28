@@ -6,8 +6,6 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.AccountsLoadError;
 import org.quuux.gdax.events.AccountsUpdated;
-import org.quuux.gdax.events.PageLoadError;
-import org.quuux.gdax.events.PageLoaded;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.events.ProductsLoadError;
 import org.quuux.gdax.events.ProductsLoaded;
@@ -122,43 +120,6 @@ public class Datastore {
         Log.d(TAG, "selected product %s", product.getName());
         selectedProductId = product.id;
         EventBus.getDefault().post(new ProductSelected());
-    }
-
-    public static abstract class Cursor<T> implements API.PaginatedResponseListener<T[]> {
-        String before, after;
-        List<T> items = new ArrayList<>();
-
-        public List<T> getItems() {
-            return items;
-        }
-
-        abstract public Class<T[]> getPageClass();
-
-        public void load() {
-            API api = API.getInstance();
-            api.loadPage(getEndpoint(), this, getPageClass());
-        }
-
-        public void reset() {
-            before = after = null;
-            items.clear();
-            load();
-        }
-
-        abstract String getEndpoint();
-
-        @Override
-        public void onSuccess(final T[] result, final String before, final String after) {
-            Collections.addAll(items, result);
-            this.before = before;
-            this.after = after;
-            EventBus.getDefault().post(new PageLoaded(this));
-        }
-
-        @Override
-        public void onError(final APIError error) {
-            EventBus.getDefault().post(new PageLoadError(this, error));
-        }
     }
 
     public static class AccountActivityCursor extends Cursor<AccountActivity> {

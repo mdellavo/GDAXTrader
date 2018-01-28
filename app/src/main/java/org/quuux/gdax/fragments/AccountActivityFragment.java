@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
+import org.quuux.gdax.Cursor;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
@@ -86,7 +87,7 @@ public class AccountActivityFragment extends CursorFragment {
 
     class AccountActivityAdapter extends CursorAdapter<AccountActivity> {
 
-        public AccountActivityAdapter(final Context context, final Datastore.Cursor<AccountActivity> cursor) {
+        public AccountActivityAdapter(final Context context, final Cursor<AccountActivity> cursor) {
             super(context, cursor);
         }
 

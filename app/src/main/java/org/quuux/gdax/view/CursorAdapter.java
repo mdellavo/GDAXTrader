@@ -5,14 +5,13 @@ import android.content.Context;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.quuux.gdax.Datastore;
-import org.quuux.gdax.events.PageLoadError;
-import org.quuux.gdax.events.PageLoaded;
+import org.quuux.gdax.Cursor;
+import org.quuux.gdax.events.CursorUpdated;
 
 public abstract class CursorAdapter<T> extends SimpleArrayAdapter<T> {
-    private final Datastore.Cursor cursor;
+    private final Cursor cursor;
 
-    public CursorAdapter(Context context, Datastore.Cursor<T> cursor) {
+    public CursorAdapter(Context context, Cursor<T> cursor) {
         super(context, cursor.getItems());
         this.cursor = cursor;
     }
@@ -26,15 +25,7 @@ public abstract class CursorAdapter<T> extends SimpleArrayAdapter<T> {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPageLoaded(PageLoaded event) {
-        if (event.cursor != cursor)
-            return;
-
-        notifyDataSetChanged();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPageLoadError(PageLoadError event) {
+    public void onCursorUpdated(CursorUpdated event) {
         if (event.cursor != cursor)
             return;
 
