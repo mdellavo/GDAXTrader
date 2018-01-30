@@ -20,15 +20,19 @@
         <RadioButton
             android:id="@+id/buy"
             android:text="@string/buy"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:checked="true"
             />
         <RadioButton
             android:id="@+id/sell"
             android:text="@string/sell"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+
+            />
     </RadioGroup>
 
     <TextView
@@ -43,7 +47,7 @@
     <EditText
         android:id="@+id/amount"
         android:layout_marginTop="10dp"
-        android:layout_width="100dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/amount_zero"
         android:layout_below="@id/label_amount"
@@ -54,9 +58,8 @@
         android:id="@+id/current_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/amount"
-        android:layout_toEndOf="@id/amount"
         android:layout_marginTop="10dp"
+        android:layout_below="@id/amount"
         />
 
     <TextView
@@ -64,14 +67,14 @@
         android:text="@string/price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/current_price"
         android:layout_marginTop="10dp"
+        android:layout_below="@id/current_price"
         android:visibility="gone"
         />
 
     <EditText
         android:id="@+id/price"
-        android:layout_width="100dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:hint="@string/amount_zero"
@@ -80,13 +83,16 @@
         android:visibility="gone"
         />
 
+
     <TextView
         android:id="@+id/total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/price"
-        android:layout_marginTop="10dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="20dp"
         android:textStyle="bold"
+        android:textSize="14sp"
         />
 
     <Button

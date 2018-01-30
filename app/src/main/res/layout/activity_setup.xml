@@ -1,56 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.quuux.gdax.SetupActivity">
+    tools:context="org.quuux.gdax.SetupActivity"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    >
+
+    <TextView
+        android:id="@+id/label_api_key"
+        android:text="@string/api_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
 
     <EditText
         android:id="@+id/api_key"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
+        android:layout_below="@id/label_api_key"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/label_api_secret"
+        android:text="@string/api_secret"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textNoSuggestions"
-        android:hint="@string/api_key"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/api_key"
         />
 
     <EditText
         android:id="@+id/api_secret"
-        android:layout_width="215dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:inputType="textNoSuggestions"
-        android:hint="@string/api_secret"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/api_key"/>
+        android:layout_marginTop="10dp"
+        android:inputType="textNoSuggestions|textMultiLine"
+        android:layout_below="@id/label_api_secret"
+        android:lines="3"
+        />
+
+    <TextView
+        android:id="@+id/label_api_passphrase"
+        android:text="@string/api_passphrase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/api_secret"
+        />
 
     <EditText
         android:id="@+id/api_passphrase"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
+        android:layout_marginTop="10dp"
         android:inputType="textNoSuggestions"
-        android:hint="@string/api_passphrase"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/api_secret"/>
+        android:layout_below="@id/label_api_passphrase"
+        />
 
     <Button
         android:id="@+id/save"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:ems="10"
+        android:layout_alignParentBottom="true"
         android:text="@string/save"
-        app:layout_constraintLeft_toLeftOf="@id/api_passphrase"
-        app:layout_constraintRight_toRightOf="@id/api_passphrase"
-        app:layout_constraintTop_toBottomOf="@id/api_passphrase"
-        android:onClick="onSave"/>
-</android.support.constraint.ConstraintLayout>
+        android:onClick="onSave"
+        />
+</RelativeLayout>

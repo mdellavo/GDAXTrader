@@ -40,8 +40,6 @@ public class Datastore {
     public List<Account> getAccounts() {
         return mAccounts.getItems();
     }
-
-
     public List<Product> getProducts() {
         return mProducts.getItems();
     }

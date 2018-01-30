@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.quuux.feller.Log;
-import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.model.Product;
 
