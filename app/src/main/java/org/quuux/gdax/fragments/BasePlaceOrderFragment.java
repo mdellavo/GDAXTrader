@@ -134,12 +134,9 @@ abstract public class BasePlaceOrderFragment extends Fragment {
 
 
     public void updateTotal() {
-        BigDecimal amount = cleanDecimalInput(mAmountText, false);
+        BigDecimal amount = Util.cleanDecimalInput(mAmountText, false);
 
-        if (amount == null)
-            return;
-
-        if (mTick == null)
+        if (amount == null || mTick == null)
             return;
 
         BigDecimal value = amount.divide(mTick.price, 10, BigDecimal.ROUND_HALF_DOWN);
@@ -147,33 +144,8 @@ abstract public class BasePlaceOrderFragment extends Fragment {
         mTotalText.setText(getString(R.string.order_total, product.base_currency, Util.longFormat(value)));
     }
 
-    public BigDecimal cleanDecimalInput(EditText v, boolean validate) {
-        String value = v.getText().toString();
-        if (TextUtils.isEmpty(value)) {
-            if (validate)
-                v.setError(getString(R.string.error_amount_not_valid));
-            return null;
-        }
-
-        BigDecimal amount = null;
-
-        try {
-            amount = new BigDecimal(value);
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                if (validate)
-                    v.setError(getString(R.string.error_amount_not_greater_than_zero));
-                amount = null;
-            }
-        } catch (NumberFormatException e) {
-            if (validate)
-                v.setError(getString(R.string.error_amount_not_valid));
-        }
-
-        return amount;
-    }
-
     public BigDecimal getAmount() {
-        return cleanDecimalInput(mAmountText, true);
+        return Util.cleanDecimalInput(mAmountText, true);
     }
 
     public Side getSide() {

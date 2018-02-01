@@ -6,11 +6,15 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Account;
+import org.quuux.gdax.model.CoinbaseAccount;
+import org.quuux.gdax.model.PaymentMethod;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.Tick;
 import org.quuux.gdax.net.API;
 import org.quuux.gdax.net.AccountsCursor;
+import org.quuux.gdax.net.CoinbaseAccountsCursor;
 import org.quuux.gdax.net.Cursor;
+import org.quuux.gdax.net.PaymentMethodsCursor;
 import org.quuux.gdax.net.ProductsCursor;
 
 import java.util.HashMap;
@@ -25,6 +29,8 @@ public class Datastore {
     private Map<Product, Tick> tickers = new HashMap<>();
     private ProductsCursor mProducts = new ProductsCursor();
     private AccountsCursor mAccounts = new AccountsCursor();
+    private PaymentMethodsCursor mPaymentMethods = new PaymentMethodsCursor();
+    private CoinbaseAccountsCursor mCoinbaseAccounts = new CoinbaseAccountsCursor();
 
     private String selectedProductId = "BTC-USD";
 
@@ -44,6 +50,18 @@ public class Datastore {
         return mProducts.getItems();
     }
 
+    public List<PaymentMethod> getPaymentMethods() {
+        if (mPaymentMethods.getState() == Cursor.State.init)
+            mPaymentMethods.load();
+
+        return mPaymentMethods.getItems();
+    }
+    public List<CoinbaseAccount> getCoinbaseAccounts() {
+        if (mCoinbaseAccounts.getState() == Cursor.State.init)
+            mCoinbaseAccounts.load();
+
+        return mCoinbaseAccounts.getItems();
+    }
 
     public void load() {
         Cursor[] cursors = new Cursor[] {mAccounts, mProducts};
@@ -85,4 +103,7 @@ public class Datastore {
         EventBus.getDefault().post(new ProductSelected());
     }
 
+    public PaymentMethodsCursor getPaymentMethodsCursor() {
+        return mPaymentMethods;
+    }
 }

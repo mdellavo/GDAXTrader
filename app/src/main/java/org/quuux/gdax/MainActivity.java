@@ -345,6 +345,4 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
             return view;
         }
     }
-
-
 }

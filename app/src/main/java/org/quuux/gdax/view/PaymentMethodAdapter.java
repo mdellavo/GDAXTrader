@@ -8,22 +8,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.quuux.feller.Log;
 import org.quuux.gdax.R;
-import org.quuux.gdax.model.Product;
+import org.quuux.gdax.model.PaymentMethod;
+import org.quuux.gdax.net.Cursor;
 
-import java.util.List;
 
+public class PaymentMethodAdapter extends CursorAdapter<PaymentMethod> {
 
-public class ProductAdapater extends SimpleArrayAdapter<Product> {
-    private static final String TAG = Log.buildTag(ProductAdapater.class);
-
-    static class ProductTag {
-        TextView product;
+    static class PaymentMethodTag {
+        TextView name;
     }
 
-    public ProductAdapater(final Context context, final List<Product> items) {
-        super(context, items);
+    public PaymentMethodAdapter(final Context context, final Cursor<PaymentMethod> cursor) {
+        super(context, cursor);
     }
 
     @Override
@@ -42,17 +39,18 @@ public class ProductAdapater extends SimpleArrayAdapter<Product> {
     }
 
     @Override
-    public void bindView(final int position, final View view, final Product product) {
-        ProductTag tag = (ProductTag) view.getTag();
-        tag.product.setText(product.getName());
+    public void bindView(final int position, final View view, final PaymentMethod paymentMethod) {
+        PaymentMethodTag tag = (PaymentMethodTag) view.getTag();
+        tag.name.setText(paymentMethod.name);
     }
 
     @Override
     public View newView(final int position, final ViewGroup parent) {
-        final View v = LayoutInflater.from(getContext()).inflate(R.layout.product_spinner_item, parent, false);
-        ProductTag tag = new ProductTag();
-        tag.product = v.findViewById(R.id.product);
+        final View v = LayoutInflater.from(getContext()).inflate(R.layout.payment_method_item, parent, false);
+        PaymentMethodTag tag = new PaymentMethodTag();
+        tag.name = v.findViewById(R.id.payment_method);
         v.setTag(tag);
         return v;
     }
+
 }

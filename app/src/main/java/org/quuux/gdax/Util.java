@@ -1,6 +1,9 @@
 package org.quuux.gdax;
 
 
+import android.text.TextUtils;
+import android.widget.EditText;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -32,6 +35,32 @@ public class Util {
 
     public static String dateFormat(Date d) {
         return DATE_FORMAT.format(d);
+    }
+
+
+    public static BigDecimal cleanDecimalInput(EditText v, boolean validate) {
+        String value = v.getText().toString();
+        if (TextUtils.isEmpty(value)) {
+            if (validate)
+                v.setError(v.getContext().getString(R.string.error_amount_not_valid));
+            return null;
+        }
+
+        BigDecimal amount = null;
+
+        try {
+            amount = new BigDecimal(value);
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                if (validate)
+                    v.setError(v.getContext().getString(R.string.error_amount_not_greater_than_zero));
+                amount = null;
+            }
+        } catch (NumberFormatException e) {
+            if (validate)
+                v.setError(v.getContext().getString(R.string.error_amount_not_valid));
+        }
+
+        return amount;
     }
 
 }

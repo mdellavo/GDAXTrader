@@ -8,6 +8,7 @@ import android.widget.EditText;
 
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
+import org.quuux.gdax.Util;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.Side;
@@ -39,7 +40,7 @@ public class PlaceStopOrderFragment extends BasePlaceOrderFragment {
     }
 
     public BigDecimal getPrice() {
-        return cleanDecimalInput(mPriceText, true);
+        return Util.cleanDecimalInput(mPriceText, true);
     }
 
     public void onCommit() {

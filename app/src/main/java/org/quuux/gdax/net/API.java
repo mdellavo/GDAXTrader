@@ -3,6 +3,7 @@ package org.quuux.gdax.net;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.widget.ListView;
 
 import com.google.gson.Gson;
 
@@ -16,9 +17,11 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.AccountActivity;
+import org.quuux.gdax.model.Deposit;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.OrderBookEntry;
+import org.quuux.gdax.model.PaymentMethod;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.SubscribeMessage;
 import org.quuux.gdax.model.Tick;
@@ -70,6 +73,7 @@ public class API {
     public static final String GDAX_FILLS_ENDPOINT = "/fills";
     public static final String GDAX_PAYMENT_METHODS_ENDPOINT = "/payment-methods";
     public static final String GDAX_COINBASE_ACCOUNTS_ENDPOINT = "/coinbase-accounts";
+    public static final String GDAX_DEPOSIT_PAYMENT_METHOD_ENDPOINT = "/deposits/payment-method";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -380,6 +384,11 @@ public class API {
 
     public void cancelOrder(final Order order, final ResponseListener<Order> listener) {
         apiCall(Method.DELETE, orderEndpoint(order), listener, Order.class);
+    }
+
+    public void deposit(Deposit deposit, final ResponseListener<Deposit> listener) {
+        RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, gson.toJson(deposit));
+        apiCall(Method.POST, GDAX_DEPOSIT_PAYMENT_METHOD_ENDPOINT, body, listener, Deposit.class);
     }
 
     // Oauth
