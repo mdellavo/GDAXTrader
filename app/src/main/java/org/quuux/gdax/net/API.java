@@ -391,6 +391,10 @@ public class API {
         apiCall(Method.POST, GDAX_DEPOSIT_PAYMENT_METHOD_ENDPOINT, body, listener, Deposit.class);
     }
 
+    public void getCandles() {
+
+    }
+
     // Oauth
 
     public String getOAuthUrl() {

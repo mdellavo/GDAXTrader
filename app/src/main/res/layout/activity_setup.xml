@@ -27,13 +27,23 @@
         android:layout_marginTop="10dp"
         />
 
+    <ImageButton
+        android:id="@+id/scan_api_key"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_scan"
+        android:layout_below="@id/api_key"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        />
+
     <TextView
         android:id="@+id/label_api_secret"
         android:text="@string/api_secret"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_below="@id/api_key"
+        android:layout_below="@id/scan_api_key"
         />
 
     <EditText
@@ -46,13 +56,23 @@
         android:lines="3"
         />
 
+    <ImageButton
+        android:id="@+id/scan_api_secret"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_scan"
+        android:layout_below="@id/api_secret"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        />
+
     <TextView
         android:id="@+id/label_api_passphrase"
         android:text="@string/api_passphrase"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_below="@id/api_secret"
+        android:layout_below="@id/scan_api_secret"
         />
 
     <EditText
@@ -63,6 +83,17 @@
         android:inputType="textNoSuggestions"
         android:layout_below="@id/label_api_passphrase"
         />
+
+    <ImageButton
+        android:id="@+id/scan_api_passphrase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_action_scan"
+        android:layout_below="@id/api_passphrase"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        />
+
 
     <Button
         android:id="@+id/save"
