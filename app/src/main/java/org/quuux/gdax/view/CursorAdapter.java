@@ -9,7 +9,7 @@ import org.quuux.gdax.net.Cursor;
 import org.quuux.gdax.events.CursorUpdated;
 
 public abstract class CursorAdapter<T> extends SimpleArrayAdapter<T> {
-    private final Cursor cursor;
+    public final Cursor cursor;
 
     public CursorAdapter(Context context, Cursor<T> cursor) {
         super(context, cursor.getItems());

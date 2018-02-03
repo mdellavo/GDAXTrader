@@ -2,16 +2,17 @@ package org.quuux.gdax.fragments;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import org.quuux.gdax.R;
+import org.quuux.gdax.Datastore;
+import org.quuux.gdax.model.PaymentMethod;
+import org.quuux.gdax.model.Withdraw;
+import org.quuux.gdax.net.PaymentMethodsCursor;
+import org.quuux.gdax.view.CursorAdapter;
+import org.quuux.gdax.view.PaymentMethodAdapter;
 
-public class BankAccountWithdrawFragment extends Fragment {
-    public BankAccountWithdrawFragment() {
-    }
+import java.math.BigDecimal;
+
+public class BankAccountWithdrawFragment extends BaseWithdrawFragment<PaymentMethod> {
     public static BankAccountWithdrawFragment newInstance() {
         BankAccountWithdrawFragment fragment = new BankAccountWithdrawFragment();
         Bundle args = new Bundle();
@@ -20,16 +21,14 @@ public class BankAccountWithdrawFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
+    protected CursorAdapter<PaymentMethod> getAdapter() {
+        PaymentMethodsCursor cursor = Datastore.getInstance().getPaymentMethods();
+        PaymentMethodAdapter adapter = new PaymentMethodAdapter(getContext(), cursor);
+        return adapter;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_bank_account_withdraw, container, false);
+    protected Withdraw getWithdraw(final PaymentMethod source, final BigDecimal amount) {
+        return Withdraw.newPaymentMethod(source, amount);
     }
-
 }

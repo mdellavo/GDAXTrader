@@ -3,7 +3,6 @@ package org.quuux.gdax.net;
 import org.greenrobot.eventbus.EventBus;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.CursorUpdated;
-import org.quuux.gdax.net.API;
 
 import java.util.ArrayList;
 import java.util.Collections;

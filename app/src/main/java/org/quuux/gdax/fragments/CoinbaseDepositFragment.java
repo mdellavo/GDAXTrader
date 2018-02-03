@@ -2,16 +2,17 @@ package org.quuux.gdax.fragments;
 
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import org.quuux.gdax.R;
+import org.quuux.gdax.Datastore;
+import org.quuux.gdax.model.CoinbaseAccount;
+import org.quuux.gdax.model.Deposit;
+import org.quuux.gdax.net.CoinbaseAccountsCursor;
+import org.quuux.gdax.view.CoinbaseAccountAdapter;
+import org.quuux.gdax.view.CursorAdapter;
 
-public class CoinbaseDepositFragment extends Fragment {
-    public CoinbaseDepositFragment() {
-    }
+import java.math.BigDecimal;
+
+public class CoinbaseDepositFragment extends BaseDepositFragment<CoinbaseAccount> {
 
     public static CoinbaseDepositFragment newInstance() {
         CoinbaseDepositFragment fragment = new CoinbaseDepositFragment();
@@ -21,16 +22,14 @@ public class CoinbaseDepositFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
+    protected CursorAdapter<CoinbaseAccount> getAdapter() {
+        CoinbaseAccountsCursor cursor = Datastore.getInstance().getCoinbaseAccounts();
+        CoinbaseAccountAdapter adapter = new CoinbaseAccountAdapter(getContext(), cursor);
+        return adapter;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_coinbase_deposit, container, false);
+    protected Deposit getDeposit(final CoinbaseAccount source, final BigDecimal amount) {
+        return Deposit.newCoinbase(source, amount);
     }
-
 }

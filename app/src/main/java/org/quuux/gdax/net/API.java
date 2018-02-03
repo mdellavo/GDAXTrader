@@ -3,7 +3,6 @@ package org.quuux.gdax.net;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.widget.ListView;
 
 import com.google.gson.Gson;
 
@@ -16,15 +15,14 @@ import org.greenrobot.eventbus.EventBus;
 import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.model.Account;
-import org.quuux.gdax.model.AccountActivity;
 import org.quuux.gdax.model.Deposit;
 import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.OrderBookEntry;
-import org.quuux.gdax.model.PaymentMethod;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.SubscribeMessage;
 import org.quuux.gdax.model.Tick;
+import org.quuux.gdax.model.Withdraw;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -74,6 +72,10 @@ public class API {
     public static final String GDAX_PAYMENT_METHODS_ENDPOINT = "/payment-methods";
     public static final String GDAX_COINBASE_ACCOUNTS_ENDPOINT = "/coinbase-accounts";
     public static final String GDAX_DEPOSIT_PAYMENT_METHOD_ENDPOINT = "/deposits/payment-method";
+    public static final String GDAX_DEPOSIT_COINBASE_ACCOUNT_ENDPOINT = "/deposits/coinbase-account";
+    public static final String GDAX_WITHDRAWAL_PAYMENT_METHOD_ENDPOINT = "/withdrawals/payment-method";
+    public static final String GDAX_WITHDRAWAL_COINBASE_ACCOUNT_ENDPOINT = "/withdrawals/coinbase-account";
+    public static final String GDAX_WITHDRAWAL_CRYPTO_ADDRESS_ENDPOINT = "/withdrawals/crypto";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -388,7 +390,33 @@ public class API {
 
     public void deposit(Deposit deposit, final ResponseListener<Deposit> listener) {
         RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, gson.toJson(deposit));
-        apiCall(Method.POST, GDAX_DEPOSIT_PAYMENT_METHOD_ENDPOINT, body, listener, Deposit.class);
+
+        String endpoint;
+        if (deposit.coinbase_account_id != null)
+            endpoint = GDAX_DEPOSIT_COINBASE_ACCOUNT_ENDPOINT;
+        else if (deposit.payment_method_id != null)
+            endpoint = GDAX_DEPOSIT_PAYMENT_METHOD_ENDPOINT;
+        else
+            throw new RuntimeException("unknown deposit type: " + deposit);
+
+        apiCall(Method.POST, endpoint, body, listener, Deposit.class);
+    }
+
+    public void withdraw(final Withdraw withdraw, final ResponseListener<Withdraw> listener) {
+        RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, gson.toJson(withdraw));
+
+        String endpoint;
+        if (withdraw.coinbase_account_id != null)
+            endpoint = GDAX_WITHDRAWAL_COINBASE_ACCOUNT_ENDPOINT;
+        else if (withdraw.payment_method_id != null)
+            endpoint = GDAX_WITHDRAWAL_PAYMENT_METHOD_ENDPOINT;
+        else if (withdraw.crypto_address != null)
+            endpoint = GDAX_WITHDRAWAL_CRYPTO_ADDRESS_ENDPOINT;
+        else
+            throw new RuntimeException("unknown withdraw type: " + withdraw);
+
+        apiCall(Method.POST, endpoint, body, listener, Withdraw.class);
+
     }
 
     public void getCandles() {

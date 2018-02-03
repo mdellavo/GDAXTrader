@@ -9,17 +9,17 @@
     >
 
     <TextView
-        android:id="@+id/label_payment_method"
+        android:id="@+id/label_from"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/bank_account"
+        android:text="@string/from"
         />
 
     <Spinner
-        android:id="@+id/payment_method"
+        android:id="@+id/from"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/label_payment_method"
+        android:layout_below="@id/label_from"
         android:layout_marginTop="10dp"
         />
 
@@ -27,7 +27,7 @@
         android:id="@+id/label_amount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/payment_method"
+        android:layout_below="@id/from"
         android:text="@string/amount"
         android:layout_marginTop="10dp"
         />
@@ -42,7 +42,7 @@
 
     <Button
         android:id="@+id/commit"
-        android:text="@string/place_order"
+        android:text="@string/deposit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"

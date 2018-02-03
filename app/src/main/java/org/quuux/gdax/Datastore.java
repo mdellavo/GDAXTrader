@@ -50,18 +50,6 @@ public class Datastore {
         return mProducts.getItems();
     }
 
-    public List<PaymentMethod> getPaymentMethods() {
-        if (mPaymentMethods.getState() == Cursor.State.init)
-            mPaymentMethods.load();
-
-        return mPaymentMethods.getItems();
-    }
-    public List<CoinbaseAccount> getCoinbaseAccounts() {
-        if (mCoinbaseAccounts.getState() == Cursor.State.init)
-            mCoinbaseAccounts.load();
-
-        return mCoinbaseAccounts.getItems();
-    }
 
     public void load() {
         Cursor[] cursors = new Cursor[] {mAccounts, mProducts};
@@ -103,7 +91,8 @@ public class Datastore {
         EventBus.getDefault().post(new ProductSelected());
     }
 
-    public PaymentMethodsCursor getPaymentMethodsCursor() {
+    public PaymentMethodsCursor getPaymentMethods() {
         return mPaymentMethods;
     }
+    public CoinbaseAccountsCursor getCoinbaseAccounts() { return mCoinbaseAccounts; }
 }
