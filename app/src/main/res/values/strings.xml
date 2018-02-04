@@ -56,5 +56,9 @@
     <string name="coinbase">Coinbase</string>
     <string name="from">From</string>
     <string name="to">To</string>
+    <string name="from_bank_account">From Bank Account</string>
+    <string name="from_coinbase">From CoinBase Account</string>
+    <string name="to_bank_account">To Bank Account</string>
+    <string name="to_coinbase">To CoinBase Account</string>
 
 </resources>

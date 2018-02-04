@@ -79,10 +79,10 @@ public class WithdrawFragment extends BaseGDAXFragment {
             int resId = 0;
             switch(position) {
                 case 0:
-                    resId = R.string.bank_account;
+                    resId = R.string.to_bank_account;
                     break;
                 case 1:
-                    resId = R.string.coinbase;
+                    resId = R.string.to_coinbase;
                     break;
             }
             return resId != 0 ? getString(resId) : null;
