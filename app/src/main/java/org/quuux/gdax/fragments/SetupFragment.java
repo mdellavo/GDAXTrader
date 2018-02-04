@@ -21,6 +21,10 @@ import java.util.Arrays;
 
 public class SetupFragment extends BaseGDAXFragment {
 
+    public interface Listener {
+        void showHome();
+    }
+
     EditText apiKeyField, apiSecretField, apiPassphraseField;
     EditText[] fields;
 
@@ -28,6 +32,7 @@ public class SetupFragment extends BaseGDAXFragment {
     ImageButton[] buttons;
 
     Button saveButton;
+
 
     public SetupFragment() {
     }

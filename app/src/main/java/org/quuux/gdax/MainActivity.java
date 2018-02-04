@@ -34,6 +34,7 @@ import org.quuux.gdax.fragments.BaseGDAXFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
 import org.quuux.gdax.fragments.DepositFragment;
 import org.quuux.gdax.fragments.FillsFragment;
+import org.quuux.gdax.fragments.HomeFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.fragments.SetupFragment;
@@ -50,7 +51,10 @@ import org.quuux.gdax.view.SimpleArrayAdapter;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements BasePlaceOrderFragment.Listener {
+public class MainActivity extends AppCompatActivity implements
+        BasePlaceOrderFragment.Listener,
+        SetupFragment.Listener
+{
 
     private static final String TAG = Log.buildTag(MainActivity.class);
     private static final String HELP_URL = "https://gdax.quuux.org";
@@ -115,6 +119,8 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
         mSpinner.setAdapter(mSpinnerAdapter);
         setProduct();
+
+        showHome(false);
     }
 
     @Override
@@ -175,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         return fm.findFragmentByTag(tag);
     }
 
-    private void swapFrag(final BaseGDAXFragment frag, final String tag, final boolean addToBackStack) {
+    private void swapFrag(final BaseGDAXFragment frag, final String tag, final boolean addToBackStack, final boolean closeDrawer) {
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.content_frame, frag, tag);
@@ -185,14 +191,19 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
         mSpinner.setVisibility(frag.needsProductSelector() ? View.VISIBLE : View.GONE);
 
-        if (mDrawerLayout.isDrawerOpen(mDrawerList))
+        if (closeDrawer && mDrawerLayout.isDrawerOpen(mDrawerList))
             mDrawerLayout.closeDrawer(mDrawerList, true);
-
     }
 
     private boolean onNavSelected(final MenuItem item) {
         boolean rv = false;
         switch (item.getItemId()) {
+
+            case R.id.home:
+                showHome();
+                rv = true;
+                break;
+
             case R.id.setup:
                 showSetup();
                 rv = true;
@@ -236,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = SetupFragment.newInstance();
-        swapFrag(fragment, tag, false);
+        swapFrag(fragment, tag, false, true);
     }
 
     private void showHelp() {
@@ -244,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = WebViewFragment.newInstance(HELP_URL);
-        swapFrag(fragment, tag, false);
+        swapFrag(fragment, tag, false, true);
     }
 
     private void showFills() {
@@ -252,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = FillsFragment.newInstance();
-        swapFrag(fragment,  tag, false);
+        swapFrag(fragment,  tag, false, true);
     }
 
     public void showOrders() {
@@ -260,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = OrdersFragment.newInstance();
-        swapFrag(fragment,  tag, false);
+        swapFrag(fragment,  tag, false, true);
     }
 
     public void showAccountActivity(Account account) {
@@ -268,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = AccountActivityFragment.newInstance(account);
-        swapFrag(frag, tag, false);
+        swapFrag(frag, tag, false, true);
     }
 
     public void showPlaceOrder() {
@@ -276,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = PlaceOrderFragment.newInstance();
-        swapFrag(frag, tag, false);
+        swapFrag(frag, tag, false, true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -302,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = WithdrawFragment.newInstance();
-        swapFrag(frag, tag, false);
+        swapFrag(frag, tag, false, true);
     }
 
     private void showDeposit() {
@@ -310,7 +321,20 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = DepositFragment.newInstance();
-        swapFrag(frag, tag, false);
+        swapFrag(frag, tag, false, true);
+    }
+
+    public void showHome(boolean closeDrawer) {
+        String tag = "home";
+        BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
+        if (frag == null)
+            frag = HomeFragment.newInstance();
+        swapFrag(frag, tag, false, closeDrawer);
+    }
+
+    @Override
+    public void showHome() {
+        showHome(true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
