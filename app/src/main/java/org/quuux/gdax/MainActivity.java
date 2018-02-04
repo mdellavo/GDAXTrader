@@ -1,7 +1,6 @@
 package org.quuux.gdax;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -37,6 +36,7 @@ import org.quuux.gdax.fragments.DepositFragment;
 import org.quuux.gdax.fragments.FillsFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
+import org.quuux.gdax.fragments.SetupFragment;
 import org.quuux.gdax.fragments.WebViewFragment;
 import org.quuux.gdax.fragments.WithdrawFragment;
 import org.quuux.gdax.model.Account;
@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         boolean rv = false;
         switch (item.getItemId()) {
             case R.id.setup:
-                launchSetup();
+                showSetup();
                 rv = true;
                 break;
 
@@ -229,6 +229,14 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
                 break;
         }
         return rv;
+    }
+
+    private void showSetup() {
+        String tag = "setup";
+        BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
+        if (fragment == null)
+            fragment = SetupFragment.newInstance();
+        swapFrag(fragment, tag, false);
     }
 
     private void showHelp() {
@@ -327,14 +335,6 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
     }
 
-
-    private void launchSignIn() {
-        startActivity(new Intent(this, SignInActivity.class));
-    }
-
-    private void launchSetup() {
-        startActivity(new Intent(this, SetupActivity.class));
-    }
 
     static class AccountTag {
         TextView currency, balance;

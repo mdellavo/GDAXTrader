@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.quuux.gdax.SetupActivity"
     android:paddingLeft="15dp"
     android:paddingRight="15dp"
     android:paddingTop="10dp"
@@ -101,6 +100,5 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:text="@string/save"
-        android:onClick="onSave"
         />
 </RelativeLayout>
