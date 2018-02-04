@@ -61,5 +61,6 @@
     <string name="to_bank_account">To Bank Account</string>
     <string name="to_coinbase">To CoinBase Account</string>
     <string name="home">Home</string>
+    <string name="welcome">Welcome to GDAX Trader!</string>
 
 </resources>
