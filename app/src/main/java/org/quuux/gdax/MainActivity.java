@@ -37,6 +37,7 @@ import org.quuux.gdax.fragments.DepositFragment;
 import org.quuux.gdax.fragments.FillsFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
+import org.quuux.gdax.fragments.WebViewFragment;
 import org.quuux.gdax.fragments.WithdrawFragment;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Product;
@@ -52,6 +53,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements BasePlaceOrderFragment.Listener {
 
     private static final String TAG = Log.buildTag(MainActivity.class);
+    private static final String HELP_URL = "https://gdax.quuux.org";
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerList;
@@ -220,8 +222,21 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
                 showWithdraw();
                 rv = true;
                 break;
+
+            case R.id.help:
+                showHelp();
+                rv = true;
+                break;
         }
         return rv;
+    }
+
+    private void showHelp() {
+        String tag = "help";
+        BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
+        if (fragment == null)
+            fragment = WebViewFragment.newInstance(HELP_URL);
+        swapFrag(fragment, tag, false);
     }
 
     private void showFills() {
