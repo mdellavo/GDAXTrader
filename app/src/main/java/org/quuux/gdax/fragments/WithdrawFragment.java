@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import org.quuux.gdax.R;
 
-public class WithdrawFragment extends Fragment {
+public class WithdrawFragment extends BaseGDAXFragment {
 
     ViewPager mPager;
     PagerAdapter mAdapter;

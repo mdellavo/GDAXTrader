@@ -35,6 +35,11 @@ public class FillsFragment extends CursorFragment {
     }
 
     @Override
+    public boolean needsProductSelector() {
+        return true;
+    }
+
+    @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         if (getArguments() != null) {
         }

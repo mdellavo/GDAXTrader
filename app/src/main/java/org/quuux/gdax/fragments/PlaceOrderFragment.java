@@ -1,7 +1,6 @@
 package org.quuux.gdax.fragments;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,7 +13,7 @@ import android.view.ViewGroup;
 
 import org.quuux.gdax.R;
 
-public class PlaceOrderFragment extends Fragment {
+public class PlaceOrderFragment extends BaseGDAXFragment {
 
     ViewPager mPager;
     PagerAdapter mAdapter;
@@ -28,6 +27,12 @@ public class PlaceOrderFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
+    @Override
+    public boolean needsProductSelector() {
+        return true;
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

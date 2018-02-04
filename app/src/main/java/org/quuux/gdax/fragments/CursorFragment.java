@@ -18,7 +18,7 @@ import org.quuux.gdax.R;
 import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.view.CursorAdapter;
 
-public abstract class CursorFragment extends Fragment {
+public abstract class CursorFragment extends BaseGDAXFragment {
     private Cursor<?> mCursor;
     private CursorAdapter<?> mAdapter;
     private ListView mList;

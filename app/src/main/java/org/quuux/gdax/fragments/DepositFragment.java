@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import org.quuux.gdax.R;
 
-public class DepositFragment extends Fragment {
+public class DepositFragment extends BaseGDAXFragment {
 
     ViewPager mPager;
     PagerAdapter mAdapter;

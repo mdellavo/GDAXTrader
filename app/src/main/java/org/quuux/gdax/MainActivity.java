@@ -31,6 +31,7 @@ import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.fragments.AccountActivityFragment;
+import org.quuux.gdax.fragments.BaseGDAXFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
 import org.quuux.gdax.fragments.DepositFragment;
 import org.quuux.gdax.fragments.FillsFragment;
@@ -172,13 +173,15 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
         return fm.findFragmentByTag(tag);
     }
 
-    private void swapFrag(final Fragment frag, final String tag, final boolean addToBackStack) {
+    private void swapFrag(final BaseGDAXFragment frag, final String tag, final boolean addToBackStack) {
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.content_frame, frag, tag);
         if (addToBackStack)
             ft.addToBackStack(null);
         ft.commit();
+
+        mSpinner.setVisibility(frag.needsProductSelector() ? View.VISIBLE : View.GONE);
 
         if (mDrawerLayout.isDrawerOpen(mDrawerList))
             mDrawerLayout.closeDrawer(mDrawerList, true);
@@ -223,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     private void showFills() {
         String tag = "fills";
-        Fragment fragment = findFragmentByTag(tag);
+        BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = FillsFragment.newInstance();
         swapFrag(fragment,  tag, false);
@@ -231,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     public void showOrders() {
         String tag = "orders";
-        Fragment fragment = findFragmentByTag(tag);
+        BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = OrdersFragment.newInstance();
         swapFrag(fragment,  tag, false);
@@ -239,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     public void showAccountActivity(Account account) {
         String tag = "account-activity-" + account.id;
-        Fragment frag = findFragmentByTag(tag);
+        BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = AccountActivityFragment.newInstance(account);
         swapFrag(frag, tag, false);
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     public void showPlaceOrder() {
         String tag = "place-order";
-        Fragment frag = findFragmentByTag(tag);
+        BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = PlaceOrderFragment.newInstance();
         swapFrag(frag, tag, false);
@@ -273,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     private void showWithdraw() {
         String tag = "withdraw";
-        Fragment frag = findFragmentByTag(tag);
+        BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = WithdrawFragment.newInstance();
         swapFrag(frag, tag, false);
@@ -281,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements BasePlaceOrderFra
 
     private void showDeposit() {
         String tag = "deposit";
-        Fragment frag = findFragmentByTag(tag);
+        BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = DepositFragment.newInstance();
         swapFrag(frag, tag, false);
