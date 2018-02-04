@@ -9,4 +9,8 @@ public class BaseGDAXFragment extends Fragment {
         return false;
     }
 
+    public int getTitle() {
+        return 0;
+    }
+
 }

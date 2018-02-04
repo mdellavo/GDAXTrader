@@ -41,6 +41,11 @@ public class OrdersFragment extends CursorFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.orders;
+    }
+
+    @Override
     public boolean needsProductSelector() {
         return true;
     }

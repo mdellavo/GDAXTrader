@@ -27,6 +27,11 @@ public class DepositFragment extends BaseGDAXFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.deposit;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {

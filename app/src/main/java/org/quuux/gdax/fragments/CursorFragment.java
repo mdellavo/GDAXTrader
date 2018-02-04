@@ -106,8 +106,10 @@ public abstract class CursorFragment extends BaseGDAXFragment {
                 break;
 
             case loading:
-                mSwipeRefresh.setRefreshing(true);
-                mEmptyView.setVisibility(View.GONE);
+                if (mSwipeRefresh != null)
+                    mSwipeRefresh.setRefreshing(true);
+                if (mEmptyView != null)
+                    mEmptyView.setVisibility(View.GONE);
                 break;
 
             case loaded:

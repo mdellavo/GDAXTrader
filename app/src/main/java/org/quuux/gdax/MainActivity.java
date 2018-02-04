@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -193,6 +194,13 @@ public class MainActivity extends AppCompatActivity implements
 
         mSpinner.setVisibility(frag.needsProductSelector() ? View.VISIBLE : View.GONE);
 
+        int title = frag.getTitle();
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayShowTitleEnabled(title > 0);
+        if (title > 0) {
+            ab.setTitle(title);
+        }
+
         if (closeDrawer && mDrawerLayout.isDrawerOpen(mDrawerList))
             mDrawerLayout.closeDrawer(mDrawerList, true);
     }
@@ -256,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements
         String tag = "help";
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
-            fragment = WebViewFragment.newInstance(HELP_URL);
+            fragment = WebViewFragment.newInstance(R.string.help, HELP_URL);
         swapFrag(fragment, tag, true, true);
     }
 

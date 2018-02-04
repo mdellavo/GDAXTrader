@@ -48,6 +48,11 @@ public class SetupFragment extends BaseGDAXFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.setup;
+    }
+
+    @Override
     public void onAttach(final Context context) {
         super.onAttach(context);
         mListener = (Listener) context;

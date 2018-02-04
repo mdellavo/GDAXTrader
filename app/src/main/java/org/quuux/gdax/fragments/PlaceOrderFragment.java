@@ -29,6 +29,11 @@ public class PlaceOrderFragment extends BaseGDAXFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.place_order;
+    }
+
+    @Override
     public boolean needsProductSelector() {
         return true;
     }

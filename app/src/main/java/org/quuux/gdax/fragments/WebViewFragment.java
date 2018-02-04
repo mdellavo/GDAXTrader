@@ -14,9 +14,10 @@ public class WebViewFragment extends BaseGDAXFragment {
 
     public WebViewFragment() {}
 
-    public static WebViewFragment newInstance(String url) {
+    public static WebViewFragment newInstance(int title, String url) {
         WebViewFragment frag = new WebViewFragment();
         Bundle args = new Bundle();
+        args.putInt("title", title);
         args.putString("url", url);
         frag.setArguments(args);
         return frag;
@@ -40,4 +41,11 @@ public class WebViewFragment extends BaseGDAXFragment {
     private String getUrl() {
         return getArguments().getString("url");
     }
+
+
+    @Override
+    public int getTitle() {
+        return getArguments().getInt("title");
+    }
+
 }

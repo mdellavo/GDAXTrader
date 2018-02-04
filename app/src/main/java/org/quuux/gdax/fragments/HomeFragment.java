@@ -35,8 +35,8 @@ public class HomeFragment extends BaseGDAXFragment {
     }
 
     @Override
-    public boolean needsProductSelector() {
-        return true;
+    public int getTitle() {
+        return R.string.home;
     }
 
     @Override
@@ -50,7 +50,6 @@ public class HomeFragment extends BaseGDAXFragment {
         super.onDetach();
         mListener = null;
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

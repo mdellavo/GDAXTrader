@@ -28,6 +28,11 @@ public class WithdrawFragment extends BaseGDAXFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.withdraw;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {

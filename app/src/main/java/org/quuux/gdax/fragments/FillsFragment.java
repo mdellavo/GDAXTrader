@@ -35,6 +35,11 @@ public class FillsFragment extends CursorFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.fills;
+    }
+
+    @Override
     public boolean needsProductSelector() {
         return true;
     }
