@@ -184,7 +184,10 @@ public class MainActivity extends AppCompatActivity implements
 
     private void swapFrag(final BaseGDAXFragment frag, final String tag,  final boolean addtoBackStack, final boolean closeDrawer) {
         final FragmentManager fm = getSupportFragmentManager();
-        fm.popBackStack("home", 0);
+
+        for(int i=0; i<fm.getBackStackEntryCount(); i++) {
+            fm.popBackStack();
+        }
 
         final FragmentTransaction ft = fm.beginTransaction();
         ft.setCustomAnimations(R.animator.fade_in, R.animator.fade_out);
