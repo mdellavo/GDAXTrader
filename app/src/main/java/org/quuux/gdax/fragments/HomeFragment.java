@@ -1,16 +1,24 @@
 package org.quuux.gdax.fragments;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import org.quuux.gdax.R;
 
 public class HomeFragment extends BaseGDAXFragment {
+
+    Listener mListener;
+
+    public interface Listener {
+        void showSetup();
+    }
 
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
@@ -30,6 +38,19 @@ public class HomeFragment extends BaseGDAXFragment {
     public boolean needsProductSelector() {
         return true;
     }
+
+    @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+        mListener = (Listener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,6 +92,13 @@ public class HomeFragment extends BaseGDAXFragment {
     class WelcomeCard extends ViewHolder {
         public WelcomeCard(final View itemView) {
             super(itemView);
+            Button button = itemView.findViewById(R.id.setup);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    mListener.showSetup();
+                }
+            });
         }
     }
 

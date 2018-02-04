@@ -53,8 +53,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         BasePlaceOrderFragment.Listener,
-        SetupFragment.Listener
-{
+        HomeFragment.Listener,
+        SetupFragment.Listener {
 
     private static final String TAG = Log.buildTag(MainActivity.class);
     private static final String HELP_URL = "https://gdax.quuux.org";
@@ -181,12 +181,14 @@ public class MainActivity extends AppCompatActivity implements
         return fm.findFragmentByTag(tag);
     }
 
-    private void swapFrag(final BaseGDAXFragment frag, final String tag, final boolean addToBackStack, final boolean closeDrawer) {
+    private void swapFrag(final BaseGDAXFragment frag, final String tag,  final boolean addtoBackStack, final boolean closeDrawer) {
         final FragmentManager fm = getSupportFragmentManager();
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.content_frame, frag, tag);
-        if (addToBackStack)
-            ft.addToBackStack(null);
+
+        fm.popBackStack("home", 0);
+        if (addtoBackStack)
+            ft.addToBackStack(tag);
         ft.commit();
 
         mSpinner.setVisibility(frag.needsProductSelector() ? View.VISIBLE : View.GONE);
@@ -242,28 +244,28 @@ public class MainActivity extends AppCompatActivity implements
         return rv;
     }
 
-    private void showSetup() {
+    public void showSetup() {
         String tag = "setup";
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = SetupFragment.newInstance();
-        swapFrag(fragment, tag, false, true);
+        swapFrag(fragment, tag, true, true);
     }
 
-    private void showHelp() {
+    public void showHelp() {
         String tag = "help";
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = WebViewFragment.newInstance(HELP_URL);
-        swapFrag(fragment, tag, false, true);
+        swapFrag(fragment, tag, true, true);
     }
 
-    private void showFills() {
+    public void showFills() {
         String tag = "fills";
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = FillsFragment.newInstance();
-        swapFrag(fragment,  tag, false, true);
+        swapFrag(fragment,  tag, true, true);
     }
 
     public void showOrders() {
@@ -271,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements
         BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
         if (fragment == null)
             fragment = OrdersFragment.newInstance();
-        swapFrag(fragment,  tag, false, true);
+        swapFrag(fragment,  tag, true, true);
     }
 
     public void showAccountActivity(Account account) {
@@ -279,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = AccountActivityFragment.newInstance(account);
-        swapFrag(frag, tag, false, true);
+        swapFrag(frag, tag, true, true);
     }
 
     public void showPlaceOrder() {
@@ -287,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = PlaceOrderFragment.newInstance();
-        swapFrag(frag, tag, false, true);
+        swapFrag(frag, tag, true, true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -308,20 +310,20 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private void showWithdraw() {
+    public void showWithdraw() {
         String tag = "withdraw";
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = WithdrawFragment.newInstance();
-        swapFrag(frag, tag, false, true);
+        swapFrag(frag, tag, true, true);
     }
 
-    private void showDeposit() {
+    public void showDeposit() {
         String tag = "deposit";
         BaseGDAXFragment frag = (BaseGDAXFragment) findFragmentByTag(tag);
         if (frag == null)
             frag = DepositFragment.newInstance();
-        swapFrag(frag, tag, false, true);
+        swapFrag(frag, tag, true, true);
     }
 
     public void showHome(boolean closeDrawer) {

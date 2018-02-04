@@ -2,6 +2,7 @@ package org.quuux.gdax.fragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ import org.quuux.gdax.net.API;
 import java.util.Arrays;
 
 public class SetupFragment extends BaseGDAXFragment {
+
+    private Listener mListener;
 
     public interface Listener {
         void showHome();
@@ -42,6 +45,18 @@ public class SetupFragment extends BaseGDAXFragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+        mListener = (Listener) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -110,6 +125,7 @@ public class SetupFragment extends BaseGDAXFragment {
         if (apiKey != null && apiSecret != null && apiPassphrase != null) {
             saveKey(apiKey, apiSecret, apiPassphrase);
             API.getInstance().setApiKey(apiKey, apiSecret, apiPassphrase);
+            mListener.showHome();
         }
     }
 
