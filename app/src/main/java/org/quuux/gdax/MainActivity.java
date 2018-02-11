@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
         mAccountsList = mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
-        mAccountAdapter = new AccountAdapter(this, Datastore.getInstance().getAccounts());
+        mAccountAdapter = new AccountAdapter(this, Datastore.getInstance().getAccounts().getItems());
         mAccountsList.setAdapter(mAccountAdapter);
         mAccountsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         mSpinner = findViewById(R.id.products);
-        mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts());
+        mSpinnerAdapter = new ProductAdapater(this, Datastore.getInstance().getProducts().getItems());
         mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> parent, final View view, final int position, final long id) {

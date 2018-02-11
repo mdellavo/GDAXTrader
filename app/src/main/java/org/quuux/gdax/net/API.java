@@ -20,6 +20,7 @@ import org.quuux.gdax.model.FeedMessage;
 import org.quuux.gdax.model.Order;
 import org.quuux.gdax.model.OrderBookEntry;
 import org.quuux.gdax.model.Product;
+import org.quuux.gdax.model.ProductStat;
 import org.quuux.gdax.model.SubscribeMessage;
 import org.quuux.gdax.model.Tick;
 import org.quuux.gdax.model.Withdraw;
@@ -76,6 +77,7 @@ public class API {
     public static final String GDAX_WITHDRAWAL_PAYMENT_METHOD_ENDPOINT = "/withdrawals/payment-method";
     public static final String GDAX_WITHDRAWAL_COINBASE_ACCOUNT_ENDPOINT = "/withdrawals/coinbase-account";
     public static final String GDAX_WITHDRAWAL_CRYPTO_ADDRESS_ENDPOINT = "/withdrawals/crypto";
+    public static final String GDAX_PRODUCT_STATS = "/products/%s/stats";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -417,6 +419,14 @@ public class API {
 
         apiCall(Method.POST, endpoint, body, listener, Withdraw.class);
 
+    }
+
+    public String getProductStatsEndpoint(Product product) {
+        return String.format(GDAX_PRODUCT_STATS, product.id);
+    }
+
+    public void getStats(Product product, ResponseListener<ProductStat> listener) {
+        apiCall(Method.GET, getProductStatsEndpoint(product), listener, ProductStat.class);
     }
 
     public void getCandles() {

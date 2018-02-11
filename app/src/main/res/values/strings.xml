@@ -61,5 +61,17 @@
     <string name="to_coinbase">To CoinBase Account</string>
     <string name="home">Home</string>
     <string name="welcome">Welcome to GDAX Trader!</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+    <string name="volume">Volume</string>
+    <string name="last">Last</string>
+    <string name="last_trade_price">Last trade price</string>
+    <string name="volume_24h">24 hour volume</string>
+    <string name="open_24h">24 hour open</string>
+    <string name="high_24h">24 hour high</string>
+    <string name="low_24h">24 hour low</string>
+    <string name="activity_24h">24 hour activity</string>
+    <string name="change_24h">Change</string>
+    <string name="change">Change</string>
 
 </resources>

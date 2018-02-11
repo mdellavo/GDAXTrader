@@ -113,7 +113,7 @@ abstract public class BasePlaceOrderFragment extends Fragment {
     }
 
     private void updateTicker() {
-        Datastore.getInstance().getTicker(Datastore.getInstance().getSelectedProduct());
+        Datastore.getInstance().loadTicker(Datastore.getInstance().getSelectedProduct());
     }
 
 
