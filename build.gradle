@@ -20,6 +20,7 @@ allprojects {
             url  "http://dl.bintray.com/mdellavo/maven"
         }
         google()
+        maven { url "https://jitpack.io" }
     }
 }
 

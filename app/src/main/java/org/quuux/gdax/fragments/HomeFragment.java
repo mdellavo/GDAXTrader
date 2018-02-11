@@ -50,6 +50,11 @@ public class HomeFragment extends BaseGDAXFragment {
     }
 
     @Override
+    public int getTitle() {
+        return R.string.home;
+    }
+
+    @Override
     public boolean needsProductSelector() {
         return true;
     }
