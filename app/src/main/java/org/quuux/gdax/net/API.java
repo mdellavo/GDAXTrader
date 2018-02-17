@@ -78,6 +78,7 @@ public class API {
     public static final String GDAX_WITHDRAWAL_COINBASE_ACCOUNT_ENDPOINT = "/withdrawals/coinbase-account";
     public static final String GDAX_WITHDRAWAL_CRYPTO_ADDRESS_ENDPOINT = "/withdrawals/crypto";
     public static final String GDAX_PRODUCT_STATS = "/products/%s/stats";
+    public static final String GDAX_CANDLES_ENDPOINT = "/products/%s/candles?granularity=%s";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -92,6 +93,13 @@ public class API {
     private static final String GDAX_ORDER_BOOK_SNAPSHOT_URL = GDAX_API_URL + "/products/BTC-USD/book?level=3";
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
+
+    public static final int ONE_MINUTE = 60;
+    public static final int FIVE_MINUTES = 300;
+    public static final int FIFTEEN_MINUTES = 900;
+    public static final int ONE_HOUR = 3600;
+    public static final int SIX_HOURS = 21600;
+    public static final int ONE_DAY = 86400;
 
     public enum Method {GET, PUT, POST, DELETE}
 
@@ -429,8 +437,12 @@ public class API {
         apiCall(Method.GET, getProductStatsEndpoint(product), listener, ProductStat.class);
     }
 
-    public void getCandles() {
+    public void getCandles(Product product, int granularity, ResponseListener<float[][]> listener) {
+        apiCall(Method.GET, getCandlesEndpoint(product, granularity), listener, float[][].class);
+    }
 
+    private String getCandlesEndpoint(final Product product, final int granularity) {
+        return String.format(GDAX_CANDLES_ENDPOINT, product.id, granularity);
     }
 
     // Oauth

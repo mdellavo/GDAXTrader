@@ -1,13 +1,10 @@
 package org.quuux.gdax;
 
 
-import android.util.Pair;
-
 import org.greenrobot.eventbus.EventBus;
 import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.ProductSelected;
-import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.ProductStat;
 import org.quuux.gdax.model.Tick;
@@ -20,18 +17,19 @@ import org.quuux.gdax.net.ProductsCursor;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Datastore {
     private static Datastore instance;
 
     private static final String TAG = Log.buildTag(Datastore.class);
-    private static final int TICKER_CACHE_AGE = 60 * 1000;
-    private static final int STATS_CACHE_AGE = 60 * 1000;
 
+    private static final int CACHE_AGE = 60 * 1000;
+
+    // Mem Caches
     private Map<Product, Tick> tickers = new HashMap<>();
-    private Map<Product, ProductStat> stats = new HashMap<>();
+
+    // Cursors
     private ProductsCursor mProducts = new ProductsCursor();
     private AccountsCursor mAccounts = new AccountsCursor();
     private PaymentMethodsCursor mPaymentMethods = new PaymentMethodsCursor();
@@ -79,7 +77,7 @@ public class Datastore {
 
         Tick t = tickers.get(product);
         if (t != null) {
-            if (valid(t.time, TICKER_CACHE_AGE)) {
+            if (valid(t.time, CACHE_AGE)) {
                 EventBus.getDefault().post(t);
                 return;
             }
@@ -101,26 +99,11 @@ public class Datastore {
         });
     }
 
-    public ProductStat getProductStat(Product product) {
-        return stats.get(product);
-    }
-
     public void loadStats(final Product product) {
 
-        ProductStat s = stats.get(product);
-        if (s != null) {
-            if (valid(s.created_at, STATS_CACHE_AGE)) {
-                EventBus.getDefault().post(s);
-                return;
-            }
-        }
-        if (stats.containsKey(product))
-            return;
-        stats.put(product, null);
         API.getInstance().getStats(product, new API.ResponseListener<ProductStat>() {
             @Override
             public void onSuccess(final ProductStat result) {
-                stats.put(product, result);
                 EventBus.getDefault().post(result);
             }
 
@@ -145,5 +128,34 @@ public class Datastore {
         return mPaymentMethods;
     }
     public CoinbaseAccountsCursor getCoinbaseAccounts() { return mCoinbaseAccounts; }
+
+    public void loadCandles(final Product product, final int granularity) {
+        API.getInstance().getCandles(product, granularity, new API.ResponseListener<float[][]>() {
+            @Override
+            public void onSuccess(final float[][] result) {
+                EventBus.getDefault().post(new Candles(granularity, result));
+            }
+
+            @Override
+            public void onError(final APIError error) {
+
+            }
+        });
+    }
+
+    public void loadCandles(Product product) {
+        loadCandles(product, API.ONE_HOUR);
+    }
+
+    public static class Candles {
+        public final int granularity;
+        public float[][] candles;
+        public Date loaded = new Date();
+
+        public Candles(int granularity, final float[][] candles) {
+            this.granularity = granularity;
+            this.candles = candles;
+        }
+    }
 
 }

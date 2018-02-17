@@ -2,7 +2,10 @@ package org.quuux.gdax.fragments;
 
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +13,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.github.mikephil.charting.charts.CandleStickChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.CandleData;
+import com.github.mikephil.charting.data.CandleDataSet;
+import com.github.mikephil.charting.data.CandleEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -24,20 +37,29 @@ import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.ProductStat;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends BaseGDAXFragment {
 
+    SwipeRefreshLayout mSwipeRefresh;
+    RecyclerView mRecyclerView;
+    LinearLayoutManager mLayoutManager;
+    HomeAdapter mAdapter;
     Listener mListener;
+    Datastore.Candles mCandles;
+    CandleData mCandleData;
+    ProductStat mStats;
+    boolean mStatsRefreshing;
+    boolean mCandlesRefreshing;
 
     public interface Listener {
         void showSetup();
     }
-
-    RecyclerView mRecyclerView;
-    LinearLayoutManager mLayoutManager;
-    HomeAdapter mAdapter;
 
     public HomeFragment() {
     }
@@ -82,6 +104,15 @@ public class HomeFragment extends BaseGDAXFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
+
+        mSwipeRefresh = v.findViewById(R.id.swiperefresh);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh();
+            }
+        });
+
         mRecyclerView = v.findViewById(R.id.recycler_view);
 
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -91,6 +122,10 @@ public class HomeFragment extends BaseGDAXFragment {
         mRecyclerView.setAdapter(mAdapter);
 
         return v;
+    }
+
+    private void refresh() {
+        load();
     }
 
     @Override
@@ -108,24 +143,79 @@ public class HomeFragment extends BaseGDAXFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCursorUpdated(CursorUpdated event) {
         if (Datastore.getInstance().getProducts() == event.cursor) {
-            mAdapter.notifyDataSetChanged();
-            loadStats();
+            load();
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onProductSelected(final ProductSelected event) {
-        loadStats();
+        load();
     }
 
-    private void loadStats() {
+    private void load() {
+        mSwipeRefresh.setRefreshing(true);
+        mStatsRefreshing = mCandlesRefreshing = true;
         Datastore ds = Datastore.getInstance();
-        ds.loadStats(ds.getSelectedProduct());
+        Product product = ds.getSelectedProduct();
+        if (product != null) {
+            ds.loadStats(product);
+            ds.loadCandles(product);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStatsUpdated(ProductStat stat) {
+        mStatsRefreshing = false;
+        mStats = stat;
         mAdapter.notifyDataSetChanged();
+        checkRefreshing();
+    }
+
+    private void checkRefreshing() {
+        mSwipeRefresh.setRefreshing(mStatsRefreshing || mCandlesRefreshing);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onCandlesLoaded(Datastore.Candles candles) {
+        mCandlesRefreshing = false;
+
+        mCandles = candles;
+
+
+        Arrays.sort(candles.candles, new Comparator<float[]>() {
+            @Override
+            public int compare(final float[] a, final float[] b) {
+                return Float.compare(a[0], b[0]);
+            }
+        });
+
+        List<CandleEntry> values = new ArrayList<>();
+
+        int lookback = 48;
+
+        for (int i=candles.candles.length-lookback; i<candles.candles.length; i++) {
+            float time, low, high, open, close, volume;
+            time = candles.candles[i][0];
+            low = candles.candles[i][1];
+            high = candles.candles[i][2];
+            open = candles.candles[i][3];
+            close = candles.candles[i][4];
+            volume = candles.candles[i][5];
+
+            CandleEntry entry = new CandleEntry(i, high, low, open, close);
+            values.add(entry);
+        }
+
+        CandleDataSet set = new CandleDataSet(values, "activity");
+        set.setDecreasingColor(Color.RED);
+        set.setDecreasingPaintStyle(Paint.Style.FILL);
+        set.setIncreasingColor(Color.rgb(122, 242, 84));
+        set.setIncreasingPaintStyle(Paint.Style.STROKE);
+        set.setDrawValues(false);
+
+        mCandleData = new CandleData(set);
+        mAdapter.notifyDataSetChanged();
+        checkRefreshing();
     }
 
     private boolean shouldShowWelcomeCard() {
@@ -175,20 +265,60 @@ public class HomeFragment extends BaseGDAXFragment {
             Product p = Datastore.getInstance().getSelectedProduct();
             if (p == null)
                 return;
-            ProductStat stat = Datastore.getInstance().getProductStat(p);
-            open.setText(stat != null ? Util.currencyFormat(stat.open) : "-");
-            low.setText(stat != null ? Util.currencyFormat(stat.low) : "-");
-            high.setText(stat != null ? Util.currencyFormat(stat.high) : "-");
-            volume.setText(stat != null ? Util.intFormat(stat.volume) : "-");
-            last.setText(stat != null ? Util.currencyFormat(stat.last) : "-");
+            open.setText(mStats != null ? Util.currencyFormat(mStats.open) : "-");
+            low.setText(mStats != null ? Util.currencyFormat(mStats.low) : "-");
+            high.setText(mStats != null ? Util.currencyFormat(mStats.high) : "-");
+            volume.setText(mStats != null ? Util.intFormat(mStats.volume) : "-");
+            last.setText(mStats != null ? Util.currencyFormat(mStats.last) : "-");
 
-            change.setText(stat != null ? Util.percentageFormat(stat.last.subtract(stat.open).divide(stat.open, BigDecimal.ROUND_HALF_EVEN)) : "-");
+            change.setText(mStats != null ? Util.percentageFormat(mStats.last.subtract(mStats.open).divide(mStats.open, BigDecimal.ROUND_HALF_EVEN)) : "-");
 
+        }
+    }
+
+    class CandlesCard extends ViewHolder {
+        CandleStickChart chart;
+
+        public CandlesCard(final View itemView) {
+            super(itemView);
+            chart = itemView.findViewById(R.id.chart);
+            chart.setDrawGridBackground(false);
+            chart.setDragEnabled(false);
+            chart.setTouchEnabled(false);
+            chart.getAxisRight().setEnabled(false);
+            chart.getLegend().setEnabled(false);
+            chart.setDrawBorders(false);
+            chart.getDescription().setEnabled(false);
+
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setDrawGridLines(false);
+            xAxis.setDrawAxisLine(false);
+            xAxis.setLabelRotationAngle(-45);
+            xAxis.setValueFormatter(new IAxisValueFormatter() {
+                @Override
+                public String getFormattedValue(final float value, final AxisBase axis) {
+                    float time = mCandles.candles[(int)value][0];
+                    SimpleDateFormat sdf = new SimpleDateFormat("MMM d ha");
+                    return sdf.format(new Date((long) time * 1000));
+                }
+            });
+        }
+
+        @Override
+        void bind() {
+            super.bind();
+            if (mCandleData != null) {
+                chart.setData(mCandleData);
+                chart.invalidate();
+            }
         }
     }
 
     final static int CARD_TYPE_WELCOME = 0;
     final static int CARD_TYPE_ACTIVITY = 1;
+    final static int CARD_TYPE_CANDLES= 2;
+    final static int CARD_TYPE_WHATS_NEW = 3;
 
     class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
 
@@ -199,6 +329,7 @@ public class HomeFragment extends BaseGDAXFragment {
                 mCards.add(CARD_TYPE_WELCOME);
 
             mCards.add(CARD_TYPE_ACTIVITY);
+            mCards.add(CARD_TYPE_CANDLES);
         }
 
         @Override
@@ -214,6 +345,10 @@ public class HomeFragment extends BaseGDAXFragment {
 
                 case CARD_TYPE_ACTIVITY:
                     rv = new ActivityCard(inflater.inflate(R.layout.card_activity, parent, false));
+                    break;
+
+                case CARD_TYPE_CANDLES:
+                    rv = new CandlesCard(inflater.inflate(R.layout.card_candles, parent, false));
                     break;
             }
 
