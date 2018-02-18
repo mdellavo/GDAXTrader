@@ -24,10 +24,23 @@ public class Datastore {
 
     private static final String TAG = Log.buildTag(Datastore.class);
 
+    public static class Candles {
+        public final int granularity;
+        public float[][] candles;
+        public Date loaded = new Date();
+
+        public Candles(int granularity, final float[][] candles) {
+            this.granularity = granularity;
+            this.candles = candles;
+        }
+    }
+
     private static final int CACHE_AGE = 60 * 1000;
 
     // Mem Caches
     private Map<Product, Tick> tickers = new HashMap<>();
+    private Map<Product, ProductStat> stats = new HashMap<>();
+    private Map<Product, Candles> candles = new HashMap<>();
 
     // Cursors
     private ProductsCursor mProducts = new ProductsCursor();
@@ -76,11 +89,9 @@ public class Datastore {
     public void loadTicker(final Product product) {
 
         Tick t = tickers.get(product);
-        if (t != null) {
-            if (valid(t.time, CACHE_AGE)) {
-                EventBus.getDefault().post(t);
-                return;
-            }
+        if (t != null && valid(t.time, CACHE_AGE)) {
+            EventBus.getDefault().post(t);
+            return;
         }
         if (tickers.containsKey(product))
             return;
@@ -99,11 +110,24 @@ public class Datastore {
         });
     }
 
+    public ProductStat getProductStat(Product product) {
+        return stats.get(product);
+    }
+
     public void loadStats(final Product product) {
 
+        ProductStat s = stats.get(product);
+        if (s != null && valid(s.created_at, CACHE_AGE)) {
+            EventBus.getDefault().post(s);
+            return;
+        }
+        if (stats.containsKey(product))
+            return;
+        stats.put(product, null);
         API.getInstance().getStats(product, new API.ResponseListener<ProductStat>() {
             @Override
             public void onSuccess(final ProductStat result) {
+                stats.put(product, result);
                 EventBus.getDefault().post(result);
             }
 
@@ -130,10 +154,21 @@ public class Datastore {
     public CoinbaseAccountsCursor getCoinbaseAccounts() { return mCoinbaseAccounts; }
 
     public void loadCandles(final Product product, final int granularity) {
+
+        Candles result = candles.get(product);
+        if (result != null && result.granularity == granularity && valid(result.loaded, CACHE_AGE)) {
+            EventBus.getDefault().post(result);
+            return;
+        }
+        if (candles.containsKey(product))
+            return;
+        candles.put(product, null);
         API.getInstance().getCandles(product, granularity, new API.ResponseListener<float[][]>() {
             @Override
             public void onSuccess(final float[][] result) {
-                EventBus.getDefault().post(new Candles(granularity, result));
+                Candles c = new Candles(granularity, result);
+                candles.put(product, c);
+                EventBus.getDefault().post(c);
             }
 
             @Override
@@ -144,18 +179,8 @@ public class Datastore {
     }
 
     public void loadCandles(Product product) {
-        loadCandles(product, API.ONE_HOUR);
+        loadCandles(product, API.ONE_DAY);
     }
 
-    public static class Candles {
-        public final int granularity;
-        public float[][] candles;
-        public Date loaded = new Date();
-
-        public Candles(int granularity, final float[][] candles) {
-            this.granularity = granularity;
-            this.candles = candles;
-        }
-    }
 
 }

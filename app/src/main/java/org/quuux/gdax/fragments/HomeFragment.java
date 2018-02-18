@@ -3,7 +3,6 @@ package org.quuux.gdax.fragments;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,15 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.CandleStickChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.CandleData;
-import com.github.mikephil.charting.data.CandleDataSet;
-import com.github.mikephil.charting.data.CandleEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -35,13 +26,10 @@ import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.ProductStat;
+import org.quuux.gdax.view.CandleView;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends BaseGDAXFragment {
@@ -56,6 +44,8 @@ public class HomeFragment extends BaseGDAXFragment {
     ProductStat mStats;
     boolean mStatsRefreshing;
     boolean mCandlesRefreshing;
+    CandleView mChart;
+
 
     public interface Listener {
         void showSetup();
@@ -178,43 +168,7 @@ public class HomeFragment extends BaseGDAXFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCandlesLoaded(Datastore.Candles candles) {
         mCandlesRefreshing = false;
-
-        mCandles = candles;
-
-
-        Arrays.sort(candles.candles, new Comparator<float[]>() {
-            @Override
-            public int compare(final float[] a, final float[] b) {
-                return Float.compare(a[0], b[0]);
-            }
-        });
-
-        List<CandleEntry> values = new ArrayList<>();
-
-        int lookback = 48;
-
-        for (int i=candles.candles.length-lookback; i<candles.candles.length; i++) {
-            float time, low, high, open, close, volume;
-            time = candles.candles[i][0];
-            low = candles.candles[i][1];
-            high = candles.candles[i][2];
-            open = candles.candles[i][3];
-            close = candles.candles[i][4];
-            volume = candles.candles[i][5];
-
-            CandleEntry entry = new CandleEntry(i, high, low, open, close);
-            values.add(entry);
-        }
-
-        CandleDataSet set = new CandleDataSet(values, "activity");
-        set.setDecreasingColor(Color.RED);
-        set.setDecreasingPaintStyle(Paint.Style.FILL);
-        set.setIncreasingColor(Color.rgb(122, 242, 84));
-        set.setIncreasingPaintStyle(Paint.Style.STROKE);
-        set.setDrawValues(false);
-
-        mCandleData = new CandleData(set);
-        mAdapter.notifyDataSetChanged();
+        mChart.update(candles);
         checkRefreshing();
     }
 
@@ -271,47 +225,19 @@ public class HomeFragment extends BaseGDAXFragment {
             volume.setText(mStats != null ? Util.intFormat(mStats.volume) : "-");
             last.setText(mStats != null ? Util.currencyFormat(mStats.last) : "-");
 
-            change.setText(mStats != null ? Util.percentageFormat(mStats.last.subtract(mStats.open).divide(mStats.open, BigDecimal.ROUND_HALF_EVEN)) : "-");
-
+            if (mStats != null) {
+                BigDecimal percentage = mStats.last.subtract(mStats.open).divide(mStats.open, BigDecimal.ROUND_HALF_EVEN);
+                change.setTextColor(percentage.compareTo(BigDecimal.ZERO) < 0 ? Color.RED : Color.GREEN);
+                change.setText(Util.percentageFormat(percentage));
+            }
         }
     }
 
     class CandlesCard extends ViewHolder {
-        CandleStickChart chart;
 
         public CandlesCard(final View itemView) {
             super(itemView);
-            chart = itemView.findViewById(R.id.chart);
-            chart.setDrawGridBackground(false);
-            chart.setDragEnabled(false);
-            chart.setTouchEnabled(false);
-            chart.getAxisRight().setEnabled(false);
-            chart.getLegend().setEnabled(false);
-            chart.setDrawBorders(false);
-            chart.getDescription().setEnabled(false);
-
-            XAxis xAxis = chart.getXAxis();
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setDrawGridLines(false);
-            xAxis.setDrawAxisLine(false);
-            xAxis.setLabelRotationAngle(-45);
-            xAxis.setValueFormatter(new IAxisValueFormatter() {
-                @Override
-                public String getFormattedValue(final float value, final AxisBase axis) {
-                    float time = mCandles.candles[(int)value][0];
-                    SimpleDateFormat sdf = new SimpleDateFormat("MMM d ha");
-                    return sdf.format(new Date((long) time * 1000));
-                }
-            });
-        }
-
-        @Override
-        void bind() {
-            super.bind();
-            if (mCandleData != null) {
-                chart.setData(mCandleData);
-                chart.invalidate();
-            }
+            mChart = itemView.findViewById(R.id.chart);
         }
     }
 

@@ -15,7 +15,7 @@ public class Util {
 
     public static final DecimalFormat SHORT_FORMAT = new DecimalFormat("###,###,##0.00######");
     public static final DecimalFormat LONG_FORMAT = new DecimalFormat("###,###,##0.00###############");
-    public static final DecimalFormat PERCENTAGE = new DecimalFormat("##0.00%");
+    public static final DecimalFormat PERCENTAGE = new DecimalFormat("+##0.00%;-##0.00%");
     public static final DecimalFormat INT_FORMAT = new DecimalFormat("###,###,##0");
     public static final NumberFormat CURRENCY_FORMAT = NumberFormat.getCurrencyInstance();
 

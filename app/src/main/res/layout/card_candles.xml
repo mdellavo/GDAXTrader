@@ -10,7 +10,7 @@
     android:layout_margin="5dp"
     >
 
-    <com.github.mikephil.charting.charts.CandleStickChart
+    <org.quuux.gdax.view.CandleView
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="300dp"
