@@ -33,6 +33,7 @@ import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.BaseGDAXFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
+import org.quuux.gdax.fragments.CandlesFragment;
 import org.quuux.gdax.fragments.DepositFragment;
 import org.quuux.gdax.fragments.FillsFragment;
 import org.quuux.gdax.fragments.HomeFragment;
@@ -218,6 +219,11 @@ public class MainActivity extends AppCompatActivity implements
                 rv = true;
                 break;
 
+            case R.id.candles:
+                showCandles();
+                rv = true;
+                break;
+
             case R.id.setup:
                 showSetup();
                 rv = true;
@@ -254,6 +260,14 @@ public class MainActivity extends AppCompatActivity implements
                 break;
         }
         return rv;
+    }
+
+    private void showCandles() {
+        String tag = "candles";
+        BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
+        if (fragment == null)
+            fragment = CandlesFragment.newInstance();
+        swapFrag(fragment, tag, true, true);
     }
 
     public void showSetup() {

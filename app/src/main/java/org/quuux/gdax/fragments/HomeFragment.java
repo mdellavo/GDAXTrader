@@ -238,6 +238,10 @@ public class HomeFragment extends BaseGDAXFragment {
         public CandlesCard(final View itemView) {
             super(itemView);
             mChart = itemView.findViewById(R.id.chart);
+            mChart.setLookback(48);
+            mChart.setDragEnabled(false);
+            mChart.setTouchEnabled(false);
+
         }
     }
 
