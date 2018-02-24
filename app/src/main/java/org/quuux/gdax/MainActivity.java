@@ -80,6 +80,22 @@ public class MainActivity extends AppCompatActivity implements
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            public void onBackStackChanged() {
+                int backstackSize = getSupportFragmentManager().getBackStackEntryCount();
+                Fragment frag;
+                if (backstackSize > 0) {
+                    FragmentManager.BackStackEntry entry = getSupportFragmentManager().getBackStackEntryAt(backstackSize - 1);
+                    frag = getSupportFragmentManager().findFragmentById(entry.getId());
+                } else {
+                    frag = getSupportFragmentManager().findFragmentByTag("home");
+                }
+                if (frag != null)
+                    updateState((BaseGDAXFragment) frag);
+            }
+        });
+
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerList = findViewById(R.id.navigation);
         mDrawerLayout.openDrawer(mDrawerList, false);
@@ -184,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void swapFrag(final BaseGDAXFragment frag, final String tag,  final boolean addtoBackStack, final boolean closeDrawer) {
+
         final FragmentManager fm = getSupportFragmentManager();
 
         for(int i=0; i<fm.getBackStackEntryCount(); i++) {
@@ -199,15 +216,19 @@ public class MainActivity extends AppCompatActivity implements
 
         mSpinner.setVisibility(frag.needsProductSelector() ? View.VISIBLE : View.GONE);
 
+        updateState(frag);
+
+        if (closeDrawer && mDrawerLayout.isDrawerOpen(mDrawerList))
+            mDrawerLayout.closeDrawer(mDrawerList, true);
+    }
+
+    private void updateState(BaseGDAXFragment frag) {
         int title = frag.getTitle();
         ActionBar ab = getSupportActionBar();
         ab.setDisplayShowTitleEnabled(title > 0);
         if (title > 0) {
             ab.setTitle(title);
         }
-
-        if (closeDrawer && mDrawerLayout.isDrawerOpen(mDrawerList))
-            mDrawerLayout.closeDrawer(mDrawerList, true);
     }
 
     private boolean onNavSelected(final MenuItem item) {

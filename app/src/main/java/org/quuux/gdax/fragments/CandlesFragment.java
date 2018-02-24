@@ -2,7 +2,6 @@ package org.quuux.gdax.fragments;
 
 
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
+import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.view.CandleView;
 
@@ -28,6 +28,16 @@ public class CandlesFragment extends BaseGDAXFragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public int getTitle() {
+        return R.string.candles;
+    }
+
+    @Override
+    public boolean needsProductSelector() {
+        return true;
     }
 
     @Override
@@ -57,6 +67,11 @@ public class CandlesFragment extends BaseGDAXFragment {
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProductSelected(final ProductSelected event) {
+        load();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
