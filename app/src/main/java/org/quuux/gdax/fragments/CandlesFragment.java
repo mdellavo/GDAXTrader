@@ -18,7 +18,8 @@ import org.quuux.gdax.view.CandleView;
 
 public class CandlesFragment extends BaseGDAXFragment {
 
-    CandleView mCandles;
+    CandleView mChart;
+    Datastore.Candles mCandles;
 
     public CandlesFragment() {
     }
@@ -52,7 +53,13 @@ public class CandlesFragment extends BaseGDAXFragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_candles, container, false);
 
-        mCandles = v.findViewById(R.id.chart);
+        mChart = v.findViewById(R.id.chart);
+        mChart.setDragEnabled(true);
+        mChart.setTouchEnabled(true);
+        mChart.setPinchZoom(true);
+        mChart.setDoubleTapToZoomEnabled(true);
+        if (mCandles != null)
+            mChart.update(mCandles);
         return v;
     }
 
@@ -76,7 +83,7 @@ public class CandlesFragment extends BaseGDAXFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCandlesLoaded(Datastore.Candles candles) {
-        mCandles.update(candles);
+        mChart.update(candles);
     }
 
     private void load() {

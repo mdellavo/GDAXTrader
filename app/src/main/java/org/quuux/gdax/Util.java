@@ -5,11 +5,14 @@ import android.text.TextUtils;
 import android.widget.EditText;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class Util {
 
@@ -80,4 +83,17 @@ public class Util {
         return amount;
     }
 
+    public static Date addDays(Date date, int days) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.add(Calendar.DATE, days);
+        return c.getTime();
+    }
+
+    public static String iso8601(Date date) {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US);
+        df.setTimeZone(tz);
+        return df.format(date);
+    }
 }

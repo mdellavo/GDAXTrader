@@ -18,6 +18,7 @@ import org.quuux.gdax.net.ProductsCursor;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Datastore {
     private static Datastore instance;
@@ -25,13 +26,35 @@ public class Datastore {
     private static final String TAG = Log.buildTag(Datastore.class);
 
     public static class Candles {
+        public final Product product;
         public final int granularity;
-        public float[][] candles;
-        public Date loaded = new Date();
+        public final Date start;
+        public final Date end;
+        public final Date loaded = new Date();
+        public final float[][] candles;
 
-        public Candles(int granularity, final float[][] candles) {
+        public Candles(Product product, int granularity, Date start, Date end, float[][] candles) {
+            this.product = product;
             this.granularity = granularity;
+            this.start = start;
+            this.end = end;
             this.candles = candles;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final Candles candles = (Candles) o;
+            return granularity == candles.granularity &&
+                    Objects.equals(product, candles.product) &&
+                    Objects.equals(start, candles.start) &&
+                    Objects.equals(end, candles.end);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(product, granularity, start, end);
         }
     }
 
@@ -40,7 +63,8 @@ public class Datastore {
     // Mem Caches
     private Map<Product, Tick> tickers = new HashMap<>();
     private Map<Product, ProductStat> stats = new HashMap<>();
-    private Map<Product, Candles> candles = new HashMap<>();
+
+    private Map<Candles, float[][]> candles = new HashMap<>();
 
     // Cursors
     private ProductsCursor mProducts = new ProductsCursor();
@@ -62,13 +86,14 @@ public class Datastore {
     public AccountsCursor getAccounts() {
         return mAccounts;
     }
+
     public ProductsCursor getProducts() {
         return mProducts;
     }
 
     public void load() {
-        Cursor[] cursors = new Cursor[] {mAccounts, mProducts};
-        for (int i=0; i<cursors.length; i++) {
+        Cursor[] cursors = new Cursor[]{mAccounts, mProducts};
+        for (int i = 0; i < cursors.length; i++) {
             if (cursors[i].getState() == Cursor.State.init)
                 cursors[i].load();
         }
@@ -151,23 +176,17 @@ public class Datastore {
     public PaymentMethodsCursor getPaymentMethods() {
         return mPaymentMethods;
     }
-    public CoinbaseAccountsCursor getCoinbaseAccounts() { return mCoinbaseAccounts; }
 
-    public void loadCandles(final Product product, final int granularity) {
+    public CoinbaseAccountsCursor getCoinbaseAccounts() {
+        return mCoinbaseAccounts;
+    }
 
-        Candles result = candles.get(product);
-        if (result != null && result.granularity == granularity && valid(result.loaded, CACHE_AGE)) {
-            EventBus.getDefault().post(result);
-            return;
-        }
-        if (candles.containsKey(product))
-            return;
-        candles.put(product, null);
-        API.getInstance().getCandles(product, granularity, new API.ResponseListener<float[][]>() {
+    public void loadCandles(final Product product, final int granularity, final Date start, final Date end) {
+
+        API.getInstance().getCandles(product, granularity, start, end, new API.ResponseListener<float[][]>() {
             @Override
             public void onSuccess(final float[][] result) {
-                Candles c = new Candles(granularity, result);
-                candles.put(product, c);
+                Candles c = new Candles(product, granularity, start, end, result);
                 EventBus.getDefault().post(c);
             }
 
@@ -178,9 +197,14 @@ public class Datastore {
         });
     }
 
-    public void loadCandles(Product product) {
-        loadCandles(product, API.ONE_DAY);
+    public void loadCandles(final Product product) {
+        loadCandles(product, API.ONE_DAY, null, null);
     }
 
 
+    public void loadRecentCandles(final Product product, int lookback) {
+        Date end = new Date();
+        Date start = Util.addDays(end, -lookback);
+        loadCandles(product, API.ONE_DAY, start, end);
+    }
 }

@@ -13,6 +13,7 @@ import com.google.gson.JsonParser;
 
 import org.greenrobot.eventbus.EventBus;
 import org.quuux.feller.Log;
+import org.quuux.gdax.Util;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.model.Account;
 import org.quuux.gdax.model.Deposit;
@@ -78,7 +79,7 @@ public class API {
     public static final String GDAX_WITHDRAWAL_COINBASE_ACCOUNT_ENDPOINT = "/withdrawals/coinbase-account";
     public static final String GDAX_WITHDRAWAL_CRYPTO_ADDRESS_ENDPOINT = "/withdrawals/crypto";
     public static final String GDAX_PRODUCT_STATS = "/products/%s/stats";
-    public static final String GDAX_CANDLES_ENDPOINT = "/products/%s/candles?granularity=%s";
+    public static final String GDAX_CANDLES_ENDPOINT = "/products/%s/candles";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -437,12 +438,20 @@ public class API {
         apiCall(Method.GET, getProductStatsEndpoint(product), listener, ProductStat.class);
     }
 
-    public void getCandles(Product product, int granularity, ResponseListener<float[][]> listener) {
-        apiCall(Method.GET, getCandlesEndpoint(product, granularity), listener, float[][].class);
+    public void getCandles(Product product, int granularity, Date start, Date end, ResponseListener<float[][]> listener) {
+        apiCall(Method.GET, getCandlesEndpoint(product, granularity, start, end), listener, float[][].class);
     }
 
-    private String getCandlesEndpoint(final Product product, final int granularity) {
-        return String.format(GDAX_CANDLES_ENDPOINT, product.id, granularity);
+    private String getCandlesEndpoint(final Product product, final int granularity, Date start, Date end) {
+        String base = String.format(GDAX_CANDLES_ENDPOINT, product.id);
+        Uri.Builder builder = Uri.parse(base).buildUpon();
+        if (granularity > 0)
+            builder.appendQueryParameter("granularity", String.valueOf(granularity));
+        if (start != null)
+            builder.appendQueryParameter("start", Util.iso8601(start));
+        if (end != null)
+            builder.appendQueryParameter("end", Util.iso8601(end));
+        return builder.toString();
     }
 
     // Oauth

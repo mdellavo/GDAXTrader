@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -30,7 +31,6 @@ import java.util.List;
 
 public class CandleView extends CombinedChart {
     private Datastore.Candles mCandles;
-    int mLookback = -1;
 
     public CandleView(final Context context) {
         super(context);
@@ -55,8 +55,17 @@ public class CandleView extends CombinedChart {
 
         int color = ContextCompat.getColor(getContext(), android.R.color.primary_text_dark);
 
-        this.getAxisRight().setEnabled(false);
-        this.getAxisLeft().setTextColor(color);
+        YAxis yRight = getAxisRight();
+        yRight.setTextColor(color);
+        yRight.setDrawZeroLine(false);
+        yRight.setDrawAxisLine(false);
+        yRight.setDrawGridLines(false);
+
+        YAxis yLeft = getAxisLeft();
+        yLeft.setTextColor(color);
+        yLeft.setDrawZeroLine(false);
+        yLeft.setDrawAxisLine(false);
+        yLeft.setDrawGridLines(false);
 
         XAxis xAxis = this.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -87,9 +96,7 @@ public class CandleView extends CombinedChart {
         List<CandleEntry> candleValues = new ArrayList<>();
         List<BarEntry> barValues = new ArrayList<>();
 
-        int start = mLookback > 0 ? candles.candles.length - mLookback : 0;
-
-        for (int i=start; i<candles.candles.length; i++) {
+        for (int i=0; i<candles.candles.length; i++) {
             float low, high, open, close, volume;
             low = candles.candles[i][1];
             high = candles.candles[i][2];
@@ -110,20 +117,22 @@ public class CandleView extends CombinedChart {
         candleSet.setIncreasingColor(Color.rgb(122, 242, 84));
         candleSet.setIncreasingPaintStyle(Paint.Style.STROKE);
         candleSet.setDrawValues(false);
+        candleSet.setAxisDependency(YAxis.AxisDependency.LEFT);
 
         BarDataSet barSet = new BarDataSet(barValues, "volume");
         barSet.setColor(R.color.cardview_light_background);
         barSet.setDrawValues(false);
+        barSet.setAxisDependency(YAxis.AxisDependency.RIGHT);
 
         CombinedData data = new CombinedData();
         data.setData(new CandleData(candleSet));
         data.setData(new BarData(barSet));
 
         setData(data);
-        invalidate();
-    }
 
-    public void setLookback(final int lookback) {
-        mLookback = lookback;
+        setVisibleYRangeMinimum(0, YAxis.AxisDependency.LEFT);
+        setVisibleYRangeMinimum(0, YAxis.AxisDependency.RIGHT);
+
+        invalidate();
     }
 }

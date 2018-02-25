@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.data.CandleData;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -40,7 +38,6 @@ public class HomeFragment extends BaseGDAXFragment {
     HomeAdapter mAdapter;
     Listener mListener;
     Datastore.Candles mCandles;
-    CandleData mCandleData;
     ProductStat mStats;
     boolean mStatsRefreshing;
     boolean mCandlesRefreshing;
@@ -144,12 +141,17 @@ public class HomeFragment extends BaseGDAXFragment {
 
     private void load() {
         mSwipeRefresh.setRefreshing(true);
-        mStatsRefreshing = mCandlesRefreshing = true;
         Datastore ds = Datastore.getInstance();
         Product product = ds.getSelectedProduct();
         if (product != null) {
-            ds.loadStats(product);
-            ds.loadCandles(product);
+            if (!mStatsRefreshing) {
+                ds.loadStats(product);
+                mStatsRefreshing = true;
+            }
+            if (!mCandlesRefreshing) {
+                ds.loadRecentCandles(product, 30);
+                mCandlesRefreshing = true;
+            }
         }
     }
 
@@ -168,7 +170,9 @@ public class HomeFragment extends BaseGDAXFragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCandlesLoaded(Datastore.Candles candles) {
         mCandlesRefreshing = false;
-        mChart.update(candles);
+        mCandles = candles;
+        if (mChart != null)
+            mChart.update(candles);
         checkRefreshing();
     }
 
@@ -238,10 +242,15 @@ public class HomeFragment extends BaseGDAXFragment {
         public CandlesCard(final View itemView) {
             super(itemView);
             mChart = itemView.findViewById(R.id.chart);
-            mChart.setLookback(48);
             mChart.setDragEnabled(false);
             mChart.setTouchEnabled(false);
 
+        }
+
+        @Override
+        void bind() {
+            if (mCandles != null)
+                mChart.update(mCandles);
         }
     }
 
