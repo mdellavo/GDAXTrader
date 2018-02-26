@@ -65,8 +65,8 @@ public class API {
 
     public static final String GDAX_API_URL = "https://api.gdax.com";
     public static final String GDAX_ACCOUNTS_ENDPOINT = "/accounts";
-    private static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
-    private static final String GDAX_PRODUCT_TICKER_ENDPOINT = "/products/%s/ticker";
+    public static final String GDAX_ACCOUNT_LEDGER_ENDPOINT = "/accounts/%s/ledger";
+    public static final String GDAX_PRODUCT_TICKER_ENDPOINT = "/products/%s/ticker";
     public static final String GDAX_ORDERS_ENDPOINT = "/orders";
     public static final String GDAX_ORDER_ENDPOINT = "/orders/%s";
     public static final String GDAX_PRODUCTS_ENDPOINT = "/products";
@@ -80,6 +80,7 @@ public class API {
     public static final String GDAX_WITHDRAWAL_CRYPTO_ADDRESS_ENDPOINT = "/withdrawals/crypto";
     public static final String GDAX_PRODUCT_STATS = "/products/%s/stats";
     public static final String GDAX_CANDLES_ENDPOINT = "/products/%s/candles";
+    public static final String GDAX_TWO_FACTOR_ENDPOINT = "/2fa";
 
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
@@ -104,8 +105,14 @@ public class API {
 
     public enum Method {GET, PUT, POST, DELETE}
 
+    private static final RequestBody NULL_BODY = RequestBody.create(null, new byte[]{});
+
     public static class ErrorMessage {
         public String message;
+    }
+
+    public static class TwoFactorResponse {
+
     }
 
     public static class OrderBookSnapshot {
@@ -413,7 +420,7 @@ public class API {
         apiCall(Method.POST, endpoint, body, listener, Deposit.class);
     }
 
-    public void withdraw(final Withdraw withdraw, final ResponseListener<Withdraw> listener) {
+    public void withdraw(final Withdraw withdraw, final String twoFactorCode, final ResponseListener<Withdraw> listener) {
         RequestBody body = RequestBody.create(JSON_MEDIA_TYPE, gson.toJson(withdraw));
 
         String endpoint;
@@ -426,8 +433,15 @@ public class API {
         else
             throw new RuntimeException("unknown withdraw type: " + withdraw);
 
-        apiCall(Method.POST, endpoint, body, listener, Withdraw.class);
+        final Request.Builder req = new Request.Builder()
+                .method(Method.POST.toString(), body)
+                .url(apiUrl(endpoint));
 
+        if (twoFactorCode != null) {
+            req.addHeader("CB-2FA-TOKEN", twoFactorCode);
+        }
+
+        makeRequest(req.build(), new APICallback<>(listener, Withdraw.class));
     }
 
     public String getProductStatsEndpoint(Product product) {
@@ -452,6 +466,10 @@ public class API {
         if (end != null)
             builder.appendQueryParameter("end", Util.iso8601(end));
         return builder.toString();
+    }
+
+    public void getTwoFactorCode(ResponseListener<TwoFactorResponse> listener) {
+        apiCall(Method.POST, GDAX_TWO_FACTOR_ENDPOINT, NULL_BODY, listener, TwoFactorResponse.class);
     }
 
     // Oauth

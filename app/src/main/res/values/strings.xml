@@ -20,7 +20,6 @@
     <string name="type">Type</string>
     <string name="date">Date</string>
     <string name="no_activity">No activity</string>
-
     <string name="place_order">Place Order</string>
     <string name="deposit">Deposit</string>
     <string name="withdraw">Withdraw</string>
@@ -34,7 +33,6 @@
     <string name="sell">Sell</string>
     <string name="error_amount_not_greater_than_zero">Amount must be greater than zero</string>
     <string name="error_amount_not_valid">Amount is not valid</string>
-
     <string name="side">Side</string>
     <string name="price">Price</string>
     <string name="size">Size</string>
@@ -74,10 +72,11 @@
     <string name="change_24h">Change</string>
     <string name="change">Change</string>
     <string name="candles">Candles</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="deposit_success_title">Deposit Success</string>
     <string name="deposit_success_message">A deposit has been placed and will be processed shortly.</string>
-
+    <string name="withdraw_success_title">Withdraw Success</string>
+    <string name="withdraw_success_message">A withdraw has been placed and will be processed shortly.</string>
+    <string name="two_fa">Two-Factor Code</string>
+    <string name="get_code">Get Code</string>
+    <string name="code_zero">0000</string>
 </resources>

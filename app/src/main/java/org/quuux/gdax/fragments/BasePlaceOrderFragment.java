@@ -2,6 +2,8 @@ package org.quuux.gdax.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,6 +36,8 @@ abstract public class BasePlaceOrderFragment extends Fragment {
     public interface Listener {
         void showOrders();
     }
+
+    Handler mHandler = new Handler(Looper.getMainLooper());
 
     protected RadioGroup mSide;
     protected EditText mAmountText;
@@ -155,7 +159,12 @@ abstract public class BasePlaceOrderFragment extends Fragment {
         API.getInstance().placeOrder(order, new API.ResponseListener<Order>() {
             @Override
             public void onSuccess(final Order result) {
-                mListener.showOrders();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.showOrders();
+                    }
+                });
             }
 
             @Override
