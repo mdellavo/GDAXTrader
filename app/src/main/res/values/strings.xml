@@ -77,5 +77,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="deposit_success_title">Deposit Success</string>
+    <string name="deposit_success_message">A deposit has been placed and will be processed shortly.</string>
 
 </resources>

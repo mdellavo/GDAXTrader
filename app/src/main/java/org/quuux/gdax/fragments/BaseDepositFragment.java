@@ -1,7 +1,10 @@
 package org.quuux.gdax.fragments;
 
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +28,8 @@ abstract public class BaseDepositFragment<T> extends Fragment {
     Spinner mSource;
     EditText mAmount;
     Button mCommit;
+
+    Handler mHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,17 +79,29 @@ abstract public class BaseDepositFragment<T> extends Fragment {
         if (source == null || amount == null)
             return;
 
+        mCommit.setEnabled(false);
+
         Deposit deposit = getDeposit(source, amount);
 
         API.getInstance().deposit(deposit, new API.ResponseListener<Deposit>() {
             @Override
             public void onSuccess(final Deposit result) {
-
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onDepositSuccess();
+                    }
+                });
             }
 
             @Override
             public void onError(final APIError error) {
-
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onDepositError();
+                    }
+                });
             }
         });
     }
@@ -98,5 +115,20 @@ abstract public class BaseDepositFragment<T> extends Fragment {
 
     public BigDecimal getAmount() {
         return Util.cleanDecimalInput(mAmount, true);
+    }
+
+    public void onDepositError() {
+        mCommit.setEnabled(true);
+    }
+
+    public void onDepositSuccess() {
+        mCommit.setEnabled(true);
+        mCommit.setText(null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(R.string.deposit_success_title);
+        builder.setMessage(R.string.deposit_success_message);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
