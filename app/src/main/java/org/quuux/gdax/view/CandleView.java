@@ -21,7 +21,9 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
+import org.quuux.gdax.Util;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,12 +62,24 @@ public class CandleView extends CombinedChart {
         yRight.setDrawZeroLine(false);
         yRight.setDrawAxisLine(false);
         yRight.setDrawGridLines(false);
+        yRight.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(final float value, final AxisBase axis) {
+                return Util.currencyFormat(BigDecimal.valueOf(value));
+            }
+        });
 
         YAxis yLeft = getAxisLeft();
         yLeft.setTextColor(color);
         yLeft.setDrawZeroLine(false);
         yLeft.setDrawAxisLine(false);
         yLeft.setDrawGridLines(false);
+        yLeft.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(final float value, final AxisBase axis) {
+                return Util.intFormat(BigDecimal.valueOf(value));
+            }
+        });
 
         XAxis xAxis = this.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
