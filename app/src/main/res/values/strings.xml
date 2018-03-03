@@ -79,4 +79,11 @@
     <string name="two_fa">Two-Factor Code</string>
     <string name="get_code">Get Code</string>
     <string name="code_zero">0000</string>
+    <string name="granularity">Granularity</string>
+    <string name="one_minute">1m</string>
+    <string name="five_minutes">5m</string>
+    <string name="fifteen_minutes">15m</string>
+    <string name="one_hour">1h</string>
+    <string name="six_hours">6h</string>
+    <string name="one_day">1d</string>
 </resources>

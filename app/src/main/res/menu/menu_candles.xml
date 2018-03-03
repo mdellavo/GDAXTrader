@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/granularity"
+        android:title="@string/granularity"
+        android:icon="@drawable/ic_action_filter"
+        app:showAsAction="always"
+        >
+        <menu xmlns:android="http://schemas.android.com/apk/res/android">
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/one_minute"
+                    android:title="@string/one_minute"
+                    />
+                <item
+                    android:id="@+id/five_minutes"
+                    android:title="@string/five_minutes"
+                    />
+                <item
+                    android:id="@+id/fifteen_minutes"
+                    android:title="@string/fifteen_minutes"
+                    />
+                <item
+                    android:id="@+id/one_hour"
+                    android:title="@string/one_hour"
+                    />
+                <item
+                    android:id="@+id/six_hours"
+                    android:title="@string/six_hours"
+                    />
+                <item
+                    android:id="@+id/one_day"
+                    android:title="@string/one_day"
+                    />
+            </group>
+        </menu>
+    </item>
+
+</menu>

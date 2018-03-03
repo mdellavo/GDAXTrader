@@ -118,21 +118,29 @@ public class CandleView extends CombinedChart {
         candleSet.setIncreasingPaintStyle(Paint.Style.STROKE);
         candleSet.setDrawValues(false);
         candleSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        candleSet.setShadowColorSameAsCandle(true);
+        candleSet.setShadowWidth(1);
 
         BarDataSet barSet = new BarDataSet(barValues, "volume");
         barSet.setColor(R.color.cardview_light_background);
         barSet.setDrawValues(false);
         barSet.setAxisDependency(YAxis.AxisDependency.RIGHT);
 
-        CombinedData data = new CombinedData();
+        CombinedData data = getData();
+        boolean initial = data == null;
+        if (initial) {
+            data = new CombinedData();
+        } else {
+            data.clearValues();
+        }
         data.setData(new CandleData(candleSet));
         data.setData(new BarData(barSet));
-
-        setData(data);
+        if (initial)
+            setData(data);
 
         setVisibleYRangeMinimum(0, YAxis.AxisDependency.LEFT);
         setVisibleYRangeMinimum(0, YAxis.AxisDependency.RIGHT);
-
+        notifyDataSetChanged();
         invalidate();
     }
 }
