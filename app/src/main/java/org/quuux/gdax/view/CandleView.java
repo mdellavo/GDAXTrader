@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class CandleView extends CombinedChart {
     private Datastore.Candles mCandles;
@@ -85,13 +86,13 @@ public class CandleView extends CombinedChart {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
-        xAxis.setLabelRotationAngle(-45);
+        xAxis.setLabelRotationAngle(-90);
         xAxis.setTextColor(color);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(final float value, final AxisBase axis) {
                 float time = mCandles.candles[(int)value][0];
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM d ha");
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM d ha", Locale.US);
                 return sdf.format(new Date((long) time * 1000));
             }
         });
@@ -131,14 +132,14 @@ public class CandleView extends CombinedChart {
         candleSet.setIncreasingColor(Color.rgb(122, 242, 84));
         candleSet.setIncreasingPaintStyle(Paint.Style.STROKE);
         candleSet.setDrawValues(false);
-        candleSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        candleSet.setAxisDependency(YAxis.AxisDependency.RIGHT);
         candleSet.setShadowColorSameAsCandle(true);
         candleSet.setShadowWidth(1);
 
         BarDataSet barSet = new BarDataSet(barValues, "volume");
         barSet.setColor(R.color.cardview_light_background);
         barSet.setDrawValues(false);
-        barSet.setAxisDependency(YAxis.AxisDependency.RIGHT);
+        barSet.setAxisDependency(YAxis.AxisDependency.LEFT);
 
         CombinedData data = getData();
         boolean initial = data == null;

@@ -202,9 +202,9 @@ public class Datastore {
     }
 
 
-    public void loadRecentCandles(final Product product, int lookback) {
+    public void loadRecentCandles(final Product product, int granularity, int lookback) {
         Date end = new Date();
         Date start = Util.addDays(end, -lookback);
-        loadCandles(product, API.ONE_DAY, start, end);
+        loadCandles(product, granularity, start, end);
     }
 }

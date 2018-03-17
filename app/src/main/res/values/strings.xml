@@ -86,4 +86,6 @@
     <string name="one_hour">1h</string>
     <string name="six_hours">6h</string>
     <string name="one_day">1d</string>
+    <string name="close">Close</string>
+    <string name="null_value">-</string>
 </resources>

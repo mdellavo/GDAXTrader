@@ -24,6 +24,7 @@ import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.ProductStat;
+import org.quuux.gdax.net.API;
 import org.quuux.gdax.view.CandleView;
 
 import java.math.BigDecimal;
@@ -149,7 +150,7 @@ public class HomeFragment extends BaseGDAXFragment {
                 mStatsRefreshing = true;
             }
             if (!mCandlesRefreshing) {
-                ds.loadRecentCandles(product, 30);
+                ds.loadRecentCandles(product, API.ONE_HOUR, 1);
                 mCandlesRefreshing = true;
             }
         }
@@ -171,8 +172,11 @@ public class HomeFragment extends BaseGDAXFragment {
     public void onCandlesLoaded(Datastore.Candles candles) {
         mCandlesRefreshing = false;
         mCandles = candles;
-        if (mChart != null)
+        if (mChart != null) {
             mChart.update(candles);
+            mChart.setVisibleXRange(24, 24);
+            mChart.moveViewToX(24);
+        }
         checkRefreshing();
     }
 

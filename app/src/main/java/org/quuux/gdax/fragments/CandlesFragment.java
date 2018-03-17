@@ -8,15 +8,26 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
+import org.quuux.gdax.Util;
 import org.quuux.gdax.events.ProductSelected;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.view.CandleView;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import static org.quuux.gdax.net.API.FIFTEEN_MINUTES;
 import static org.quuux.gdax.net.API.FIVE_MINUTES;
@@ -30,6 +41,8 @@ public class CandlesFragment extends BaseGDAXFragment {
 
     CandleView mChart;
     Datastore.Candles mCandles;
+
+    TextView mDate, mOpen, mClose, mHigh, mLow, mVolume;
 
     public CandlesFragment() {
     }
@@ -71,6 +84,26 @@ public class CandlesFragment extends BaseGDAXFragment {
         mChart.setDoubleTapToZoomEnabled(true);
         if (mCandles != null)
             onCandlesLoaded(mCandles);
+        mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(final Entry e, final Highlight h) {
+                selected(e);
+            }
+
+            @Override
+            public void onNothingSelected() {
+                selected(null);
+            }
+        });
+
+        mDate = v.findViewById(R.id.date);
+        mOpen = v.findViewById(R.id.open);
+        mClose = v.findViewById(R.id.close);
+        mHigh = v.findViewById(R.id.high);
+        mLow = v.findViewById(R.id.low);
+        mVolume = v.findViewById(R.id.volume);
+        selected(null);
+
         return v;
     }
 
@@ -176,10 +209,10 @@ public class CandlesFragment extends BaseGDAXFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onCandlesLoaded(Datastore.Candles candles) {
-        mChart.update(candles);
-        mChart.setVisibleXRangeMaximum(75);
-        mChart.moveViewToX(mChart.getData().getXMax() - 30);
         mCandles = candles;
+        mChart.update(candles);
+        mChart.setVisibleXRangeMaximum(50);
+        mChart.moveViewToX(mChart.getData().getXMax());
         getActivity().invalidateOptionsMenu();
     }
 
@@ -190,5 +223,27 @@ public class CandlesFragment extends BaseGDAXFragment {
             ds.loadCandles(product, granularity, null, null);
         }
     }
+
+    private void selected(final Entry selected) {
+        if (selected != null) {
+            float[] values = mCandles.candles[(int) selected.getX()];
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd - hh:mm:ss aa zzz", Locale.US);
+
+            mDate.setText(sdf.format(new Date((long) values[0] * 1000)));
+            mLow.setText(Util.currencyFormat(BigDecimal.valueOf(values[1])));
+            mHigh.setText(Util.currencyFormat(BigDecimal.valueOf(values[2])));
+            mOpen.setText(Util.currencyFormat(BigDecimal.valueOf(values[3])));
+            mClose.setText(Util.currencyFormat(BigDecimal.valueOf(values[4])));
+            mVolume.setText(Util.intFormat(BigDecimal.valueOf(values[5])));
+        } else {
+            mDate.setText(R.string.null_value);
+            mOpen.setText(R.string.null_value);
+            mClose.setText(R.string.null_value);
+            mHigh.setText(R.string.null_value);
+            mLow.setText(R.string.null_value);
+            mVolume.setText(R.string.null_value);
+        }
+    }
+
 
 }
