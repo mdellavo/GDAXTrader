@@ -22,18 +22,40 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Util;
+import org.quuux.gdax.net.API;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class CandleView extends CombinedChart {
     private Datastore.Candles mCandles;
+
+    class DateFormatter implements IAxisValueFormatter {
+
+        private final DateFormat dateFormat;
+
+        public DateFormatter(DateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+        }
+
+        @Override
+        public String getFormattedValue(final float value, final AxisBase axis) {
+            int ival = (int)value;
+            if (ival >= mCandles.candles.length)
+                ival = mCandles.candles.length - 1;
+            else if(ival < 0)
+                ival = 0;
+
+            float time = mCandles.candles[ival][0];
+            return dateFormat.format(new Date((long) time * 1000));
+        }
+    }
 
     public CandleView(final Context context) {
         super(context);
@@ -86,16 +108,18 @@ public class CandleView extends CombinedChart {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
-        xAxis.setLabelRotationAngle(-90);
+        xAxis.setLabelRotationAngle(-60);
         xAxis.setTextColor(color);
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(final float value, final AxisBase axis) {
-                float time = mCandles.candles[(int)value][0];
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM d ha", Locale.US);
-                return sdf.format(new Date((long) time * 1000));
-            }
-        });
+        xAxis.setAvoidFirstLastClipping(true);
+        xAxis.setLabelCount(4, true);
+        getRendererXAxis().getPaintAxisLabels().setTextAlign(Paint.Align.LEFT);
+    }
+
+    public DateFormat getDateFormat(final int granularity) {
+        if (granularity >= API.ONE_DAY)
+            return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT);
+        else
+            return SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT);
     }
 
     public void update(Datastore.Candles candles) {
@@ -155,6 +179,9 @@ public class CandleView extends CombinedChart {
 
         setVisibleYRangeMinimum(0, YAxis.AxisDependency.LEFT);
         setVisibleYRangeMinimum(0, YAxis.AxisDependency.RIGHT);
+
+        getXAxis().setValueFormatter(new DateFormatter(getDateFormat(candles.granularity)));
+
         notifyDataSetChanged();
         invalidate();
     }

@@ -227,9 +227,7 @@ public class CandlesFragment extends BaseGDAXFragment {
     private void selected(final Entry selected) {
         if (selected != null) {
             float[] values = mCandles.candles[(int) selected.getX()];
-            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd - hh:mm:ss aa zzz", Locale.US);
-
-            mDate.setText(sdf.format(new Date((long) values[0] * 1000)));
+            mDate.setText(SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT).format(new Date((long) values[0] * 1000)));
             mLow.setText(Util.currencyFormat(BigDecimal.valueOf(values[1])));
             mHigh.setText(Util.currencyFormat(BigDecimal.valueOf(values[2])));
             mOpen.setText(Util.currencyFormat(BigDecimal.valueOf(values[3])));
