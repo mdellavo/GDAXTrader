@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             public void onBackStackChanged() {
                 int backstackSize = getSupportFragmentManager().getBackStackEntryCount();
@@ -101,6 +100,27 @@ public class MainActivity extends AppCompatActivity implements
         mDrawerLayout.openDrawer(mDrawerList, false);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar,0, 0);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull final View drawerView, final float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull final View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull final View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(final int newState) {
+                updateNavigationItems(mDrawerList.getMenu());
+            }
+        });
 
         mAccountsList = mDrawerList.getHeaderView(0).findViewById(R.id.accounts);
         mAccountAdapter = new AccountAdapter(this, Datastore.getInstance().getAccounts().getItems());
@@ -141,6 +161,25 @@ public class MainActivity extends AppCompatActivity implements
         showHome(false);
     }
 
+    private void updateNavigationItems(final Menu menu) {
+        for (int i=0; i<menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            item.setEnabled(isNavigationItemEnabled(item.getItemId()));
+        }
+    }
+
+    private boolean isNavigationItemEnabled(final int id) {
+        return Settings.get(this).hasApiKey() || !requiresAuth(id);
+    }
+
+    private boolean requiresAuth(final int id) {
+        return (id == R.id.place_order ||
+                id == R.id.orders ||
+                id == R.id.fills ||
+                id == R.id.deposit ||
+                id == R.id.withdraw);
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -158,10 +197,14 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
         EventBus.getDefault().register(this);
 
+        mDrawerList.getHeaderView(0).setVisibility(Settings.get(this).hasApiKey() ? View.VISIBLE : View.GONE);
+
+        Datastore.getInstance().loadProducts();
+
         Settings settings = Settings.get(this);
         if (settings.hasApiKey()) {
             API.getInstance().setApiKey(settings.getApiKey(), settings.getApiSecret(), settings.getApiPassphrase());
-            Datastore.getInstance().load();
+            Datastore.getInstance().loadAccounts();
         }
     }
 
@@ -170,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onStop();
         EventBus.getDefault().unregister(this);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {

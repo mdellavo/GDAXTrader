@@ -1,6 +1,7 @@
 package org.quuux.gdax.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.v4.content.ContextCompat;
@@ -18,6 +19,9 @@ import com.github.mikephil.charting.data.CandleDataSet;
 import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.renderer.XAxisRenderer;
+import com.github.mikephil.charting.utils.MPPointF;
+import com.github.mikephil.charting.utils.Utils;
 
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
@@ -105,6 +109,63 @@ public class CandleView extends CombinedChart {
         });
 
         XAxis xAxis = this.getXAxis();
+        setXAxisRenderer(new XAxisRenderer(mViewPortHandler, mXAxis, mLeftAxisTransformer) {
+
+            /**
+             * draws the x-labels on the specified y-position
+             *
+             * @param pos
+             */
+            protected void drawLabels(Canvas c, float pos, MPPointF anchor) {
+
+                final float labelRotationAngleDegrees = mXAxis.getLabelRotationAngle();
+                boolean centeringEnabled = mXAxis.isCenterAxisLabelsEnabled();
+
+                float[] positions = new float[mXAxis.mEntryCount * 2];
+
+                for (int i = 0; i < positions.length; i += 2) {
+
+                    // only fill x values
+                    if (centeringEnabled) {
+                        positions[i] = mXAxis.mCenteredEntries[i / 2];
+                    } else {
+                        positions[i] = mXAxis.mEntries[i / 2];
+                    }
+                }
+
+                mTrans.pointValuesToPixel(positions);
+
+                for (int i = 0; i < positions.length; i += 2) {
+
+                    float x = positions[i];
+
+                    if (mViewPortHandler.isInBoundsX(x)) {
+
+                        String label = mXAxis.getValueFormatter().getFormattedValue(mXAxis.mEntries[i / 2], mXAxis);
+
+                        if (mXAxis.isAvoidFirstLastClippingEnabled()) {
+
+                            // avoid clipping of the last
+                            if (i/2 == mXAxis.mEntryCount - 1 && mXAxis.mEntryCount > 1) {
+                                float width = Utils.calcTextWidth(mAxisLabelPaint, label);
+
+                                if (width > mViewPortHandler.offsetRight() * 2
+                                        && x + width > mViewPortHandler.getChartWidth())
+                                    x -= width / 2;
+
+                                // avoid clipping of the first
+                            } else if (i == 0) {
+
+                                float width = Utils.calcTextWidth(mAxisLabelPaint, label);
+                                x += width / 2;
+                            }
+                        }
+
+                        drawLabel(c, label, x, pos, anchor, labelRotationAngleDegrees);
+                    }
+                }
+            }
+        });
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);

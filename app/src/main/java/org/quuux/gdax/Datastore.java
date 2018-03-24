@@ -64,8 +64,6 @@ public class Datastore {
     private Map<Product, Tick> tickers = new HashMap<>();
     private Map<Product, ProductStat> stats = new HashMap<>();
 
-    private Map<Candles, float[][]> candles = new HashMap<>();
-
     // Cursors
     private ProductsCursor mProducts = new ProductsCursor();
     private AccountsCursor mAccounts = new AccountsCursor();
@@ -91,12 +89,17 @@ public class Datastore {
         return mProducts;
     }
 
-    public void load() {
-        Cursor[] cursors = new Cursor[]{mAccounts, mProducts};
-        for (int i = 0; i < cursors.length; i++) {
-            if (cursors[i].getState() == Cursor.State.init)
-                cursors[i].load();
-        }
+    public void loadCursor(Cursor cursor) {
+        if (cursor.getState() == Cursor.State.init)
+            cursor.load();
+    }
+
+    public void loadProducts() {
+        loadCursor(mProducts);
+    }
+
+    public void loadAccounts() {
+        loadCursor(mAccounts);
     }
 
     public Product getProduct(String id) {
@@ -135,20 +138,8 @@ public class Datastore {
         });
     }
 
-    public ProductStat getProductStat(Product product) {
-        return stats.get(product);
-    }
-
     public void loadStats(final Product product) {
 
-        ProductStat s = stats.get(product);
-        if (s != null && valid(s.created_at, CACHE_AGE)) {
-            EventBus.getDefault().post(s);
-            return;
-        }
-        if (stats.containsKey(product))
-            return;
-        stats.put(product, null);
         API.getInstance().getStats(product, new API.ResponseListener<ProductStat>() {
             @Override
             public void onSuccess(final ProductStat result) {

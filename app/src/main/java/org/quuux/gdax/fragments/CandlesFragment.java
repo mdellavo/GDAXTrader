@@ -2,6 +2,7 @@ package org.quuux.gdax.fragments;
 
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,7 +28,6 @@ import org.quuux.gdax.view.CandleView;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import static org.quuux.gdax.net.API.FIFTEEN_MINUTES;
 import static org.quuux.gdax.net.API.FIVE_MINUTES;
@@ -43,6 +43,7 @@ public class CandlesFragment extends BaseGDAXFragment {
     Datastore.Candles mCandles;
 
     TextView mDate, mOpen, mClose, mHigh, mLow, mVolume;
+    SwipeRefreshLayout mSwipeRefresh;
 
     public CandlesFragment() {
     }
@@ -76,6 +77,14 @@ public class CandlesFragment extends BaseGDAXFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_candles, container, false);
+
+        mSwipeRefresh = v.findViewById(R.id.swiperefresh);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                load(mCandles.granularity);
+            }
+        });
 
         mChart = v.findViewById(R.id.chart);
         mChart.setDragEnabled(true);
@@ -214,9 +223,11 @@ public class CandlesFragment extends BaseGDAXFragment {
         mChart.setVisibleXRangeMaximum(50);
         mChart.moveViewToX(mChart.getData().getXMax());
         getActivity().invalidateOptionsMenu();
+        mSwipeRefresh.setRefreshing(false);
     }
 
     private void load(final int granularity) {
+        mSwipeRefresh.setRefreshing(true);
         Datastore ds = Datastore.getInstance();
         Product product = ds.getSelectedProduct();
         if (product != null) {

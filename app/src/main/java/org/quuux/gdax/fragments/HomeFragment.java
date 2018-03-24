@@ -141,7 +141,6 @@ public class HomeFragment extends BaseGDAXFragment {
     }
 
     private void load() {
-        mSwipeRefresh.setRefreshing(true);
         Datastore ds = Datastore.getInstance();
         Product product = ds.getSelectedProduct();
         if (product != null) {
@@ -154,6 +153,8 @@ public class HomeFragment extends BaseGDAXFragment {
                 mCandlesRefreshing = true;
             }
         }
+
+        checkRefreshing();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
