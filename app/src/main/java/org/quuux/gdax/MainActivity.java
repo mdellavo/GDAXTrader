@@ -3,6 +3,7 @@ package org.quuux.gdax;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -61,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = Log.buildTag(MainActivity.class);
     private static final String HELP_URL = "https://gdax.quuux.org";
 
+    private static final String SKU_UNLOCK = "unlock";
+
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerList;
     private ListView mAccountsList;
@@ -69,6 +78,9 @@ public class MainActivity extends AppCompatActivity implements
     private Toolbar mToolbar;
     private Spinner mSpinner;
     private ProductAdapater mSpinnerAdapter;
+
+    private BillingClient mBillingClient;
+    private boolean mUnlocked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +171,33 @@ public class MainActivity extends AppCompatActivity implements
         setProduct();
 
         showHome(false);
+
+        mBillingClient = BillingClient
+                .newBuilder(this)
+                .setListener(new PurchasesUpdatedListener() {
+                    @Override
+                    public void onPurchasesUpdated(final int responseCode, @Nullable final List<Purchase> purchases) {
+                        for (Purchase purchase : purchases) {
+                            if (SKU_UNLOCK.equals(purchase.getSku())) {
+                                mUnlocked = true;
+                                Log.d(TAG, "app unlocked!");
+                            }
+                        }
+                    }
+                })
+                .build();
+
+        mBillingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(final int responseCode) {
+                Log.d(TAG, "billing setup: response=%s", responseCode);
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+
+            }
+        });
     }
 
     private void updateNavigationItems(final Menu menu) {
@@ -428,6 +467,14 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void showHome() {
         showHome(true);
+    }
+
+    public void startUnlockPurchase() {
+        BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+                .setSku(SKU_UNLOCK)
+                .setType(BillingClient.SkuType.INAPP)
+                .build();
+        int responseCode = mBillingClient.launchBillingFlow(this, flowParams);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
