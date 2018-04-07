@@ -37,6 +37,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.feller.Log;
 import org.quuux.gdax.events.APIError;
 import org.quuux.gdax.events.CursorUpdated;
+import org.quuux.gdax.events.PurchaseUpdate;
 import org.quuux.gdax.fragments.AccountActivityFragment;
 import org.quuux.gdax.fragments.BaseGDAXFragment;
 import org.quuux.gdax.fragments.BasePlaceOrderFragment;
@@ -177,12 +178,7 @@ public class MainActivity extends AppCompatActivity implements
                 .setListener(new PurchasesUpdatedListener() {
                     @Override
                     public void onPurchasesUpdated(final int responseCode, @Nullable final List<Purchase> purchases) {
-                        for (Purchase purchase : purchases) {
-                            if (SKU_UNLOCK.equals(purchase.getSku())) {
-                                mUnlocked = true;
-                                Log.d(TAG, "app unlocked!");
-                            }
-                        }
+                        processPurchases(purchases);
                     }
                 })
                 .build();
@@ -191,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onBillingSetupFinished(final int responseCode) {
                 Log.d(TAG, "billing setup: response=%s", responseCode);
+                mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
             }
 
             @Override
@@ -198,6 +195,27 @@ public class MainActivity extends AppCompatActivity implements
 
             }
         });
+    }
+
+    private void processPurchases(List<Purchase> purchases) {
+        if (BuildConfig.DEBUG) {
+            unlockApp();
+        }
+
+        if (purchases == null) {
+            return;
+        }
+
+        for (Purchase purchase : purchases) {
+            if (SKU_UNLOCK.equals(purchase.getSku())) {
+                unlockApp();
+            }
+        }
+    }
+
+    private void unlockApp() {
+        mUnlocked = true;
+        EventBus.getDefault().post(new PurchaseUpdate());
     }
 
     private void updateNavigationItems(final Menu menu) {
@@ -439,6 +457,10 @@ public class MainActivity extends AppCompatActivity implements
         dialog.show();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPurchaseUpdate(PurchaseUpdate event) {
+
+    }
 
     public void showWithdraw() {
         String tag = "withdraw";
@@ -499,6 +521,17 @@ public class MainActivity extends AppCompatActivity implements
         mSpinner.setSelection(mSpinnerAdapter.getPosition(Datastore.getInstance().getSelectedProduct()));
     }
 
+    public boolean isUnlocked() {
+        return mUnlocked;
+    }
+
+    public void purchaseUnlock() {
+        BillingFlowParams params = BillingFlowParams.newBuilder()
+                .setSku(SKU_UNLOCK)
+                .setType(BillingClient.SkuType.INAPP)
+                .build();
+        mBillingClient.launchBillingFlow(this, params);
+    }
 
     static class AccountTag {
         TextView currency, balance;

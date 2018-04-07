@@ -88,4 +88,6 @@
     <string name="one_day">1d</string>
     <string name="close">Close</string>
     <string name="null_value">-</string>
+    <string name="nag_text">Support development of GDAX Trader!</string>
+    <string name="unlock">Unlock</string>
 </resources>

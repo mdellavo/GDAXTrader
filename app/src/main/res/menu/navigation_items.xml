@@ -12,21 +12,31 @@
 
         <item
             android:id="@+id/place_order"
-            android:title="@string/place_order" />
+            android:title="@string/place_order"
+            android:enabled="false"
+            />
 
         <item
             android:id="@+id/orders"
-            android:title="@string/orders" />
+            android:title="@string/orders"
+            android:enabled="false"
+            />
         <item
             android:id="@+id/fills"
-            android:title="@string/fills" />
+            android:title="@string/fills"
+            android:enabled="false"
+            />
 
         <item
             android:id="@+id/deposit"
-            android:title="@string/deposit" />
+            android:title="@string/deposit"
+            android:enabled="false"
+            />
         <item
             android:id="@+id/withdraw"
-            android:title="@string/withdraw" />
+            android:title="@string/withdraw"
+            android:enabled="false"
+            />
 
         <item
             android:id="@+id/setup"

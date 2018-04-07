@@ -22,6 +22,7 @@ import org.quuux.gdax.Settings;
 import org.quuux.gdax.Util;
 import org.quuux.gdax.events.CursorUpdated;
 import org.quuux.gdax.events.ProductSelected;
+import org.quuux.gdax.events.PurchaseUpdate;
 import org.quuux.gdax.model.Product;
 import org.quuux.gdax.model.ProductStat;
 import org.quuux.gdax.net.API;
@@ -47,6 +48,8 @@ public class HomeFragment extends BaseGDAXFragment {
 
     public interface Listener {
         void showSetup();
+        boolean isUnlocked();
+        void purchaseUnlock();
     }
 
     public HomeFragment() {
@@ -140,6 +143,11 @@ public class HomeFragment extends BaseGDAXFragment {
         load();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPurchaseUpdate(PurchaseUpdate event) {
+        mAdapter.update();
+    }
+
     private void load() {
         Datastore ds = Datastore.getInstance();
         Product product = ds.getSelectedProduct();
@@ -183,6 +191,10 @@ public class HomeFragment extends BaseGDAXFragment {
 
     private boolean shouldShowWelcomeCard() {
         return !Settings.get(getContext()).hasApiKey();
+    }
+
+    private boolean shouldShowNagCard() {
+        return !mListener.isUnlocked();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -259,21 +271,42 @@ public class HomeFragment extends BaseGDAXFragment {
         }
     }
 
-    final static int CARD_TYPE_WELCOME = 0;
-    final static int CARD_TYPE_ACTIVITY = 1;
-    final static int CARD_TYPE_CANDLES= 2;
-    final static int CARD_TYPE_WHATS_NEW = 3;
+    class NagCard extends ViewHolder {
+        public NagCard(final View itemView) {
+            super(itemView);
+
+            Button button = itemView.findViewById(R.id.unlock);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.purchaseUnlock();
+                }
+            });
+        }
+    }
+
+    enum CardType{WELCOME, NAG, ACTIVITY, CANDLES, WHATS_NEW};
 
     class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-        List<Integer> mCards = new ArrayList<>();
+        List<CardType> mCards = new ArrayList<>();
 
         public HomeAdapter() {
-            if (shouldShowWelcomeCard())
-                mCards.add(CARD_TYPE_WELCOME);
+            update();
+        }
 
-            mCards.add(CARD_TYPE_ACTIVITY);
-            mCards.add(CARD_TYPE_CANDLES);
+        public void update() {
+            mCards.clear();
+            if (shouldShowWelcomeCard())
+                mCards.add(CardType.WELCOME);
+
+            if (shouldShowNagCard()) {
+                mCards.add(CardType.NAG);
+            }
+
+            mCards.add(CardType.ACTIVITY);
+            mCards.add(CardType.CANDLES);
+            notifyDataSetChanged();
         }
 
         @Override
@@ -282,16 +315,20 @@ public class HomeFragment extends BaseGDAXFragment {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
             ViewHolder rv = null;
-            switch (viewType) {
-                case CARD_TYPE_WELCOME:
+            switch (CardType.values()[viewType]) {
+                case WELCOME:
                     rv = new WelcomeCard(inflater.inflate(R.layout.card_welcome, parent, false));
                     break;
 
-                case CARD_TYPE_ACTIVITY:
+                case NAG:
+                    rv = new NagCard(inflater.inflate(R.layout.card_nag, parent, false));
+                    break;
+
+                case ACTIVITY:
                     rv = new ActivityCard(inflater.inflate(R.layout.card_activity, parent, false));
                     break;
 
-                case CARD_TYPE_CANDLES:
+                case CANDLES:
                     rv = new CandlesCard(inflater.inflate(R.layout.card_candles, parent, false));
                     break;
             }
@@ -316,7 +353,7 @@ public class HomeFragment extends BaseGDAXFragment {
 
         @Override
         public int getItemViewType(final int position) {
-            return mCards.get(position);
+            return mCards.get(position).ordinal();
         }
     }
 }
