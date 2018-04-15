@@ -131,4 +131,13 @@ public class Settings {
         return prefs.getString("selected_product", null);
     }
 
+    public int getLastVersionCode() {
+        return this.prefs.getInt("last_version_code", -1);
+    }
+
+    public void setLastVersionCode(int versionCode) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("last_version_code", versionCode);
+        editor.apply();
+    }
 }

@@ -2,6 +2,8 @@ package org.quuux.gdax.fragments;
 
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.quuux.feller.Log;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Settings;
@@ -34,6 +37,7 @@ import java.util.List;
 
 public class HomeFragment extends BaseGDAXFragment {
 
+    private static final String TAG = Log.buildTag(HomeFragment.class);
     SwipeRefreshLayout mSwipeRefresh;
     RecyclerView mRecyclerView;
     LinearLayoutManager mLayoutManager;
@@ -197,6 +201,24 @@ public class HomeFragment extends BaseGDAXFragment {
         return !mListener.isUnlocked();
     }
 
+    private boolean shouldShowWhatsNew() {
+        int installedVersionCode = -1;
+
+        Context context = getContext();
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            installedVersionCode = pInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "unable to get version code: %s", e);
+        }
+
+        int lastVersionCode = Settings.get(context).getLastVersionCode();
+        boolean rv = lastVersionCode < installedVersionCode;
+        if (rv)
+            Settings.get(getContext()).setLastVersionCode(installedVersionCode);
+        return rv;
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder {
 
         public ViewHolder(final View itemView) {
@@ -302,6 +324,10 @@ public class HomeFragment extends BaseGDAXFragment {
 
             if (shouldShowNagCard()) {
                 mCards.add(CardType.NAG);
+            }
+
+            if (shouldShowWhatsNew()) {
+                mCards.add(CardType.WHATS_NEW);
             }
 
             mCards.add(CardType.ACTIVITY);

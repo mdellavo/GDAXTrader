@@ -42,9 +42,9 @@
             android:id="@+id/setup"
             android:title="@string/setup" />
 
-        <item
-            android:id="@+id/signin"
-            android:title="@string/signin" />
+        <!--<item-->
+            <!--android:id="@+id/signin"-->
+            <!--android:title="@string/signin" />-->
 
         <item
             android:id="@+id/help"
