@@ -48,6 +48,7 @@ import org.quuux.gdax.fragments.HomeFragment;
 import org.quuux.gdax.fragments.OrdersFragment;
 import org.quuux.gdax.fragments.PlaceOrderFragment;
 import org.quuux.gdax.fragments.SetupFragment;
+import org.quuux.gdax.fragments.SigninFragment;
 import org.quuux.gdax.fragments.WebViewFragment;
 import org.quuux.gdax.fragments.WithdrawFragment;
 import org.quuux.gdax.model.Account;
@@ -351,6 +352,11 @@ public class MainActivity extends AppCompatActivity implements
                 rv = true;
                 break;
 
+            case R.id.signin:
+                showSignin();
+                rv = true;
+                break;
+
             case R.id.orders:
                 showOrders();
                 rv = true;
@@ -382,6 +388,14 @@ public class MainActivity extends AppCompatActivity implements
                 break;
         }
         return rv;
+    }
+
+    private void showSignin() {
+        String tag = "signin";
+        BaseGDAXFragment fragment = (BaseGDAXFragment) findFragmentByTag(tag);
+        if (fragment == null)
+            fragment = SigninFragment.newInstance();
+        swapFrag(fragment, tag, true, true);
     }
 
     private void showCandles() {

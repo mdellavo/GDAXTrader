@@ -85,9 +85,10 @@ public class API {
     private static final String COINBASE_API_URL = "https://api.coinbase.com";
     private static final String COINBASE_TOKEN_URL = COINBASE_API_URL + "/oauth/token";
     private static final String COINBASE_TOKEN_REVOKE_URL = COINBASE_API_URL + "/oauth/revoke";
-    private static final String COINBASE_OATH_URL = "https://www.coinbase.com/oauth/authorize/create_session";
 
-    private static final String REDIRECT_URI = "gdax-quuux://coinbase-oauth";
+    private static final String COINBASE_OATH_URL = "https://www.coinbase.com/oauth/authorize";
+
+    private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
     private static final String PRODUCT_ID = "BTC-USD";
 
@@ -479,7 +480,7 @@ public class API {
                 .appendQueryParameter("client_id", CLIENT_ID)
                 .appendQueryParameter("redirect_uri", REDIRECT_URI)
                 .appendQueryParameter("response_type", "code")
-                .appendQueryParameter("scope", "")
+                //.appendQueryParameter("scope", "")
                 .build().toString();
     }
 
