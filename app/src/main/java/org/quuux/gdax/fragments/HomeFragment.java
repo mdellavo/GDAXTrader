@@ -19,6 +19,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.quuux.feller.Log;
+import org.quuux.gdax.BuildConfig;
 import org.quuux.gdax.Datastore;
 import org.quuux.gdax.R;
 import org.quuux.gdax.Settings;
@@ -202,6 +203,7 @@ public class HomeFragment extends BaseGDAXFragment {
     }
 
     private boolean shouldShowWhatsNew() {
+
         int installedVersionCode = -1;
 
         Context context = getContext();
@@ -216,7 +218,8 @@ public class HomeFragment extends BaseGDAXFragment {
         boolean rv = lastVersionCode < installedVersionCode;
         if (rv)
             Settings.get(getContext()).setLastVersionCode(installedVersionCode);
-        return rv;
+
+        return rv || BuildConfig.DEBUG;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -307,6 +310,14 @@ public class HomeFragment extends BaseGDAXFragment {
         }
     }
 
+    class WhatsNewCard extends ViewHolder {
+        public WhatsNewCard(final View itemView) {
+            super(itemView);
+
+
+        }
+    }
+
     enum CardType{WELCOME, NAG, ACTIVITY, CANDLES, WHATS_NEW};
 
     class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
@@ -348,6 +359,10 @@ public class HomeFragment extends BaseGDAXFragment {
 
                 case NAG:
                     rv = new NagCard(inflater.inflate(R.layout.card_nag, parent, false));
+                    break;
+
+                case WHATS_NEW:
+                    rv = new WhatsNewCard(inflater.inflate(R.layout.card_whats_new, parent, false));
                     break;
 
                 case ACTIVITY:
